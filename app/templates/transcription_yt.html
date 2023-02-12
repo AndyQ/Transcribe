@@ -1,0 +1,210 @@
+<html>
+    <head>
+        <title>Transcription for {{title}}</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+        <style type="text/css" media="screen">
+            /* unvisited link */
+    a:link {
+        color: blue;
+    }
+    
+    .not-selectable {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      -khtml-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    
+    /* visited link */
+    a:visited {
+        color: blue;
+    }
+    
+    .container{
+        position:relative;
+        display:block;
+        width: 800px;
+        margin: 0 auto;
+    }
+    
+    input[type=button], input[type=submit], input[type=reset] {
+      background-color: #0090ff;
+      border: none;
+      border-radius:16px;
+      color: white;
+      padding: 16px 32px;
+      text-decoration: none;
+      margin: 4px 2px;
+      cursor: pointer;
+      text-size:200px;
+    }
+    
+    
+    .aligned {
+        background:#d8eeff;
+                display: flex;
+                align-items: center;
+            }
+    
+    a:link { text-decoration: none; color: #0090ff;}
+    a:visited { text-decoration: none;  color: #0090ff;}
+    a:hover { text-decoration: none;  color: #0090ff;}
+    a:active { text-decoration: none;  color: #0090ff;}
+    
+    @media(max-width:420px){
+        .container{width:300px;font-size:12px;}
+    }
+    
+    body {
+        font-family: ui-rounded, "SF Pro Rounded", system-ui, san-serif;
+        font-size:18px;
+    }
+
+.transcription{
+    flex-grow: 1;
+    height: calc(100vh - 190px);
+    max-height: 100%;
+    position: relative;
+    top: 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+        </style>
+
+    </head>
+<body>
+    <div class="container-fluid">
+        <div style="height:20px;"></div>
+        <div class="row">
+            <div class="col-1"></div>
+            <div class="col-11">
+                <h3><a style="color:blue;" href="/">Back to files</a></h3>
+                <h1><a href="/showTranscription/{{title}}">{{title}}</a></h1>
+            </div>
+        </div>
+        <div style="height:20px;"></div>
+        <div class="row">
+            <div class="col-1"></div>
+            <div class="col-5 transcription">
+                {% for item in transcription %}
+                <div class="segment" id="segment{{loop.index0}}" style="font-weight: normal;">
+                    <p id="0">
+                        {{item[0] | format_millis}}
+                        <a onclick="pause()">◼</a>
+                        &nbsp;
+                        <a onclick="seek( {{item[0] | to_secs}} );">►</a>
+                        {{item[2]}}
+                    </p>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="col-6">
+                <div id="yt-player"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+    
+<script>
+// Load the IFrame Player API code asynchronously.
+var tag = document.createElement("script");
+
+tag.src = "https://www.youtube.com/iframe_api";
+var firstScriptTag = document.getElementsByTagName("script")[0];
+firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+function pause() {
+    if(player) {
+        player.pauseVideo();
+    }
+
+}
+function seek(sec){
+    if(player){
+        seconds = sec;
+        player.seekTo(seconds, true);
+        player.playVideo()
+    }
+}
+
+// Instantiate the Player.
+var player = null;
+function onYouTubeIframeAPIReady() {
+  player = new YT.Player("yt-player", {
+    height: "390",
+    width: "640",
+    videoId: "{{file}}"
+  });
+
+  // This is the source "window" that will emit the events.
+  var iframeWindow = player.getIframe().contentWindow;
+
+  // So we can compare against new updates.
+  var lastTimeUpdate = 0;
+
+  var lastBold = null;
+
+  // Listen to events triggered by postMessage,
+  // this is how different windows in a browser
+  // (such as a popup or iFrame) can communicate.
+  // See: https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+  window.addEventListener("message", function(event) {
+    // Check that the event was sent from the YouTube IFrame.
+    if (event.source === iframeWindow) {
+      var data = JSON.parse(event.data);
+
+      // The "infoDelivery" event is used by YT to transmit any
+      // kind of information change in the player,
+      // such as the current time or a playback quality change.
+      if (
+        data.event === "infoDelivery" &&
+        data.info &&
+        data.info.currentTime
+      ) {
+        // currentTime is emitted very frequently (milliseconds),
+        // but we only care about whole second changes.
+        var time = data.info.currentTime;
+
+        {% for item in transcription %}
+        if(time < {{item[1]| to_secs}}) {
+          if(lastBold) {
+              lastBold.style.fontWeight = "normal";
+          }
+          lastBold = document.getElementById("segment{{loop.index0}}");
+          lastBold.style.fontWeight = "bold"; 
+
+          var parentDiv =  $('.transcription');
+          var innerListItem =  $('#segment{{loop.index0}}');
+          
+          if (!checkIfInView(innerListItem)) {
+            parentDiv.scrollTop(parentDiv.scrollTop() + (innerListItem.position().top - parentDiv.position().top) - (parentDiv.height()/2) + (innerListItem.height()/2)  )
+          }
+
+          return;
+        }
+        {% endfor %}
+      }
+    }
+  });
+
+    function checkIfInView(element){
+        var parentDiv =  $('.transcription');
+
+        var offset = element.offset().top - $(window).scrollTop();
+
+        if(offset > window.innerHeight - 100 ){
+            // Not in view so scroll to it
+            // $('html,body').animate({scrollTop: offset}, 1000);
+            return false;
+        }
+        return true;
+    }
+
+}
+</script>
+</body>
+</html>
