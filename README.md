@@ -60,3 +60,5 @@ Then access it using `http://localhost:8080`
 
 ## Credits
 This was inspired by David Smith's (https://mastodon.social/@_Davidsmith) PodSearch (https://podsearch.david-smith.org), and Web-Whisper (https://github.com/pluja/web-whisper)
+
+Thanks to Georgi Gerganov (@ggerganov) for Whisper.cpp, plus also the teams at FFMpeg and and YT-DLP/YouTube Downloader.
