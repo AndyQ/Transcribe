@@ -49,7 +49,7 @@ mkdir ./instance ./instance/models
 python3 -m scripts.init-db
 
 wget --quiet --show-progress -O instance/models/ggml-base.bin https://huggingface.co/datasets/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
-
+```
 
 ## Usage
 
