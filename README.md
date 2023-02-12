@@ -7,6 +7,11 @@ The transcription can be viewed and listened to  within a generated webpage, and
 
 ## Screenshots
 
+<img src="images/main.png" alt="Main Screen" width="800"/>
+
+<img src="images/playback.png" alt="Playback screen" width="800"/>
+
+
 ## Requirements
 Note - this has been developed and tested on an M1 Mac.  It should work on other systems but your mileage may vary (and I can't provide any support for these).
 
