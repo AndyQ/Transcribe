@@ -8,7 +8,7 @@
     
 .transcription{
     flex-grow: 1;
-    height: calc(100vh - 190px);
+    height: calc(100vh - 80px);
     max-height: 100%;
     position: relative;
     top: 0;
@@ -21,7 +21,7 @@
 <body>
     <div class="container-fluid">
         <div style="height:20px;"></div>
-        <div class="row">
+        <div class="row" style="height:60px;">
             <div class="col-1"></div>
             <div class="col-11">
                 <h1 class="txt-dark">{{title}}</h1>
@@ -115,18 +115,21 @@ function onYouTubeIframeAPIReady() {
 
                 {% for item in transcription %}
                 if(time < {{item[1]| to_secs}}) {
-                    if(lastBold) {
-                        lastBold.style.fontWeight = "normal";
-                    }
-                    lastBold = document.getElementById("segment{{loop.index0}}");
-                    lastBold.style.fontWeight = "bold"; 
 
-                    var parentDiv =  $('.transcription');
-                    var innerListItem =  $('#segment{{loop.index0}}');
-                    
-                    if (!checkIfInView(innerListItem)) {
-                        parentDiv.scrollTop(parentDiv.scrollTop() + (innerListItem.position().top - parentDiv.position().top) - (parentDiv.height()/2) + (innerListItem.height()/2)  )
-                    }
+                    var next = document.getElementById("segment{{loop.index0}}");
+                    if ( next != lastBold ) {
+                        if(lastBold) {
+                        lastBold.style.fontWeight = "normal";
+                        }
+
+                        var parentDiv =  $('.transcription');
+                        var innerListItem =  $('#segment{{loop.index0}}');
+                        if (!checkIfInView(innerListItem)) {
+                            parentDiv.scrollTop(parentDiv.scrollTop() + (innerListItem.position().top - parentDiv.position().top) - (parentDiv.height()/2) + (innerListItem.height()/2)  )
+                        }
+                        lastBold = next;
+                        lastBold.style.fontWeight = "bold"; 
+                    }                    
 
                     return;
                 }
@@ -140,7 +143,7 @@ function onYouTubeIframeAPIReady() {
 
         var offset = element.offset().top - $(window).scrollTop();
 
-        if(offset > window.innerHeight - 100 ){
+        if(offset > window.innerHeight - 150 ){
             // Not in view so scroll to it
             // $('html,body').animate({scrollTop: offset}, 1000);
             return false;
