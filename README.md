@@ -13,7 +13,7 @@ The transcription can be viewed and listened to  within a generated webpage, and
 
 
 ## Requirements
-Note - this has been developed and tested on an M1 Mac.  It should work on other systems but your mileage may vary (and I can't provide any support for these).
+Note - this has been developed and tested on an M1 Mac.  It should work on other systems but your mileage may vary.
 
 Python 3.8 - other versions may also work
 ffmpeg (https://ffmpeg.org/download.html) - Required to convert to 16bit mono audio
