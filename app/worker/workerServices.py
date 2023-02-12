@@ -7,6 +7,9 @@ from app.constants import Paths, Status
 from app import database
 from app import utils
 
+import yt_dlp
+
+
 def handleTask( task ):
     type = task['type']
     id = task['id']
@@ -70,18 +73,32 @@ def convertAudioFile(id):
 def convertYoutubeFile(youtubeID):
     inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
 
-    outputFile = "{Paths.inprogress}/tmp_yt.wav"
+    outputFile = f"{Paths.inprogress}/tmp_yt.wav"
 
     ffmpeg_location = utils.getPath('ffmpeg')
 
-    command = f"yt-dlp --ffmpeg-location {ffmpeg_location} -f bestaudio --extract-audio --audio-format wav --audio-quality 0 --postprocessor-args '-osr 16000 -ac 1' -o {outputFile}  {inputFile}"
-    rc = subprocess.call(command, shell=True)
-    if rc < 0:
-        # process was killed by signal
-        return None
-    elif rc > 0:
-        database.updateItemStatus( id, constants.Status.error )
-        return None
+    URLS = [inputFile]
+
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        '--ffmpeg-location': ffmpeg_location,
+        'postprocessors': [{  # Extract audio using ffmpeg
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'wav'
+        }],
+        'postprocessor_args': [
+            '-osr', '16000',
+            '-ac', '1'
+        ],
+        'prefer_ffmpeg': True,
+        'outtmpl': outputFile,
+    }
+
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        error_code = ydl.download(URLS)
+        if error_code != 0:
+            database.updateItemStatus( id, constants.Status.error )
+            return None
 
     return outputFile
 
