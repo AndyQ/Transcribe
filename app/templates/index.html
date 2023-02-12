@@ -1,102 +1,61 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Whisper</title>
+        <title>Transcribe</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
         <link href="{{url_for('static', filename='fontawesome/css/fontawesome.css')}}" rel="stylesheet">
         <link href="{{url_for('static', filename='fontawesome/css/brands.css')}}" rel="stylesheet">
         <link href="{{url_for('static', filename='fontawesome/css/regular.css')}}" rel="stylesheet">
         <link href="{{url_for('static', filename='fontawesome/css/solid.css')}}" rel="stylesheet">
         <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
-
-        <style>
-.container2 {
-  height: 100%;
-  max-height: 150%;
-}
-.left {
-    padding-left: 20px;
-}
-.middle {
-    padding-left: 20px;
-}
-.right {
-    padding-left: 20px;
-}
-.container2,
-.content {
-  display: flex;
-}
-.container2 {
-  flex-direction: column;
-}
-.content {
-  overflow: show;
-}
-.content,
-.content div {
-  flex: 1;
-}
-.content div {
-  overflow: auto;
-}
-
-        </style>
     </head>
-    <body class="bg-gray-800">
+    <body>
 
         <div class="toast-container position-fixed bottom-0 end-0 p-3">
             <div id="liveToast" class="toast" role="alert" data-bs-delay="2000" aria-live="assertive" aria-atomic="true">
-            <div id="toastBody" class="toast-body">
-                Added to queue.
-            </div>
+                <div id="toastBody" class="toast-body">
+                    Added to queue.
+                </div>
             </div>
         </div>
       
-        <div class="container-fluid container2">
+        <div class="container-fluid scroll-container">
             <!-- Header -->
-            <div class="flex-column justify-content-center bg-purple px-2">        
+            <div class="flex-column justify-content-center px-2">        
                 <div class="align-middle">
-                    <p class="text-5xl text-slate-300 font-bold text-center mt-5">Whisper</p>
+                    <p class="txt-dark text-5xl font-bold text-center mt-5">Transcribe</p>
                 </div>
-                <p class="text-md font-bold text-slate-300 text-center mt-2">Convert any audio to text</p>
+                <p class="text-md font-bold txt-dark text-center mt-2">Convert any audio to text</p>
             </div>
             
             <!-- Controls -->
-            <div class="flex-column justify-content-center bg-red text-white px-2 " style="height:200px;">
+            <div class="flex-column justify-content-center px-2 " style="height:200px;">
                 <div class="row">
                     <div class="col-6 text-center justify-center">
         
                         <!-- component -->
-                        <label class="bg-blue-500 text-white hover:bg-blue-800 font-bold py-2 px-4 my-1.5 rounded inline-flex items-center cursor-pointer">
+                        <label class="mainButton py-2 px-4 my-1.5 rounded">
                             <span><i class="fa-solid fa-cloud-arrow-up"></i> File</span>
                             <input accept="audio/*, video/*" name="fileSelect" id="fileSelect" type='file' class="hidden" />
                         </label>
 
-                        <label id="youtubeSelect" class="bg-blue-500 text-white hover:bg-blue-800 font-bold py-2 px-4 my-1.5 rounded inline-flex items-center cursor-pointer">
+                        <label id="youtubeSelect" class="mainButton py-2 px-4 my-1.5 rounded">
                             <span><i class="fa-brands fa-youtube"></i> YouTube</span>
                         </label>
 
-                        <label id="transcribe" class="bg-blue-500 text-white hover:bg-blue-800 font-bold ms-4 py-2 px-4 my-1.5 rounded inline-flex items-center cursor-pointer">
+                        <label id="transcribe" class="mainButton ms-4 py-2 px-4 my-1.5 rounded ">
                             <span><i class="fa-regular fa-comment"></i> Transcribe</span>
                         </label>
                         <div class="text-center justify-center">
-                            <label id="selectedFileName" class="hidden text-white hover:bg-blue-800 font-bold py-2 px-4 my-1.5 rounded inline-flex items-center cursor-pointer"> </label>
+                            <label id="selectedFileName" class="hidden text-white font-bold py-2 px-4 my-1.5 rounded inline-flex items-center cursor-pointer"> </label>
                             <input id="youTubeURL" class="hidden" type="text" size="40" placeholder="Paste the YouTube URL here">
                         </div>
                     </div>
 
-                    <div class="col-6 ">
+                    <div class="col-6">
                         <div class="">
-                            <label for="lang">Audio language</label>
-                            <select required id="lang" class="form-select 
-                            rounded
-                            text-sm
-                            font-normal
-                            bg-white 
-                            rounded
-                            focus:bg-white focus:outline-none
-                            ">
+                            <label class="txt-dark" for="lang">Audio language</label>
+                            <select required id="lang" class="form-select rounded text-sm">
                                 <option value="auto">Auto detect</option>
                                 <option value="ca">Catalan</option>
                                 <option value="cs">Czech</option>
@@ -121,29 +80,29 @@
                                 <option value="sv">Swedish</option>
                             </select>
         
-                            <div class="flex flex-col text-left font-bold text-sky-600 p-2">
+                            <div class=" text-left">
                                 <div>
                                     <div class="my-1">
-                                        <input id="generateSubtitles" bind:checked={generateSubtitles}  class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox">
-                                        <label class="flex flex-row align-middle text-slate-800" for="generateSubtitles">
+                                        <input id="generateSubtitles" class="form-check-input" type="checkbox">
+                                        <label class="txt-dark" for="generateSubtitles">
                                             <span>
                                             Subtitle file
                                             </span>
                                         </label>
                                     </div>
                                     <div class="my-1">
-                                        <input  id="translate" bind:checked={translate}  class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox">
-                                        <label class="flex flex-row align-middle text-slate-800" for="translate">
+                                        <input  id="translate"  class="form-check-input" type="checkbox">
+                                        <label class="txt-dark" for="translate">
                                             <span>
                                             Translate
                                             </span>
                                         </label>
                                     </div>
                                     <div class="my-1">
-                                        <input id="speedup" bind:checked={speedUp}  class="form-check-input appearance-none h-4 w-4 border border-gray-300 rounded-sm bg-white checked:bg-blue-600 checked:border-blue-600 focus:outline-none transition duration-200 mt-1 align-top bg-no-repeat bg-center bg-contain float-left mr-2 cursor-pointer" type="checkbox">
-                                        <label class="flex flex-row align-middle text-slate-300" for="speedup">
+                                        <input id="speedup" class="form-check-input" type="checkbox">
+                                        <label class="txt-dark" for="speedup">
                                             <span>
-                                            Audio x2 <a class="text-blue-600 font-bold font-mono" href="https://codeberg.org/pluja/web-whisper/wiki/Features#audio-x2">(i)</a>
+                                            Audio x2
                                             </span>
                                         </label>
                                     </div>
@@ -154,26 +113,26 @@
                 </div>
             </div>
 
-            <p class="text-5xl text-slate-300 font-bold text-center mt-2">Queues</p>
+            <p class="text-5xl txt-dark font-bold text-center mt-2">Queues</p>
             <div class="flex-column justify-content-center text-white px-2 ">
                 <div class="row">
                     <div class="col-4 ">
-                        <p class="text-5xl text-slate-300 font-bold text-center">Waiting</p>
+                        <p class="text-5xl txt-dark font-bold text-center">Waiting</p>
                     </div>
                     <div class="col-4">
-                        <p class="text-5xl text-slate-300 font-bold text-center">Processing</p>
+                        <p class="text-5xl txt-dark font-bold text-center">Processing</p>
                     </div>
                     <div class="col-4">
-                        <p class="text-5xl text-slate-300 font-bold text-center">Done</p>
+                        <p class="text-5xl txt-dark font-bold text-center">Done</p>
                     </div>
                 </div>
             </div>
 
             <div class="content">
-                <div class="left border-4 border-white border-end">
+                <div class="left border-4 border-color border-end">
                     <div id="waitingItems" class=""></div>
                 </div>
-                <div class="middle border-4 border-white border-end">
+                <div class="middle border-4 border-color border-end">
                     <div id="inProgressItems" class=""></div>
                 </div>
                 <div class="right">
@@ -181,8 +140,8 @@
                 </div>
             </div>
 
-            <div class="flex-column justify-content-center bg-darkblue px-2 pt-5">
-                <p class="text-md font-bold text-slate-300 text-center"><i class="fa-regular fa-comment-dots"></i> by <a class="text-blue-400" href="https://github.com/AndyQ">AndyQ</a></p>
+            <div>
+                <p class="text-md font-bold txt-dark text-center"><i class="fa-regular fa-comment-dots"></i> by <a class="txt-dark" href="https://github.com/AndyQ">AndyQ</a></p>
             </div>                
 
         </div>
@@ -271,7 +230,7 @@
                     $("#doneItems").empty();
     
                     for (var i = 0; i < data['waiting'].length; i++) {
-                        $("#waitingItems").append('<p class="text-slate-300 font-bold text-left">' + data['waiting'][i].title + '</p>');
+                        $("#waitingItems").append('<p class="txt-dark font-bold text-left">' + data['waiting'][i].title + '</p>');
                     }
                     if ( data['error'].length > 0 )
                         $("#waitingItems").append( "<br><p class='text-red font-bold text-left'>Errors:</p>")
@@ -279,10 +238,10 @@
                             $("#waitingItems").append(`<p><a href="/delete/${data['error'][i].id}"><i class="fa-solid fa-trash"></i></a> - <span class="text-red text-left">${data['error'][i].title}</span></p>`);
                         }
                     for (var i = 0; i < data['inprogress'].length; i++) {
-                        $("#inProgressItems").append('<p class="text-slate-300 font-bold text-left">' + data['inprogress'][i].title + '</p>');
+                        $("#inProgressItems").append('<p class="txt-dark font-bold text-left">' + data['inprogress'][i].title + '</p>');
                     }
                     for (var i = 0; i < data['done'].length; i++) {
-                        $("#doneItems").append(`<p><i data-id="${data['done'][i].id}" class="deleteItem text-white fa-solid fa-trash"></i> - <a target="_blank" href="/showTranscription/${data['done'][i].id}"><span class="text-slate-300 font-bold text-left">` + data['done'][i].title + '</span></a></p>');
+                        $("#doneItems").append(`<p><i data-id="${data['done'][i].id}" class="deleteItem txt-dark fa-solid fa-trash"></i> - <a target="_blank" href="/showTranscription/${data['done'][i].id}"><span class="txt-dark font-bold text-left">` + data['done'][i].title + '</span></a></p>');
                     }
                 }
             });

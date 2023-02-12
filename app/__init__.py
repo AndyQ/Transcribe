@@ -1,6 +1,7 @@
 import os
 import atexit
 from flask import Flask
+import logging
 
 def create_app(test_config=None):
     # create and configure the app
@@ -22,6 +23,16 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+
+    # stop getQueueDetails route from being logged as it
+    # happens every 5 seconds
+    class AjaxFilter(logging.Filter):
+        def filter(self, record):  
+            return "/getQueueDetails" not in record.getMessage()
+
+    log = logging.getLogger('werkzeug')
+    log.addFilter(AjaxFilter())
+
 
     # Import our Jinja template filters
     @app.template_filter()

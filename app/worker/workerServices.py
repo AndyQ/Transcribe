@@ -39,7 +39,7 @@ def handleTask( task ):
         ytName = f"{task['file_name']}.wav"
         fileName = f"{id}.wav"
 
-        convertedFile = convertYoutubeFile(ytName)
+        convertedFile = convertYoutubeFile(id, ytName)
         if convertedFile == None:
             return
         transcriptionFile = transcribe(convertedFile, fileName)
@@ -70,7 +70,7 @@ def convertAudioFile(id):
 
     return outputFile
 
-def convertYoutubeFile(youtubeID):
+def convertYoutubeFile(id, youtubeID):
     inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
 
     outputFile = f"{Paths.inprogress}/tmp_yt.wav"
@@ -95,8 +95,12 @@ def convertYoutubeFile(youtubeID):
     }
 
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-        error_code = ydl.download(URLS)
-        if error_code != 0:
+        try:
+            error_code = ydl.download(URLS)
+            if error_code != 0:
+                database.updateItemStatus( id, constants.Status.error )
+                return None
+        except Exception as e:
             database.updateItemStatus( id, constants.Status.error )
             return None
 

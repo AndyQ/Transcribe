@@ -62,13 +62,14 @@ def showTranscription( id ):
     context = {
         "title" : item['title'],
         "file" : item['file_name'],
+        "id" : item['id'],
         "transcription" : transcription,
     }
     return render_template(page, **context)
 
-@bp.route('/getFile/<file>', methods=['GET'])
-def getFile( file ):
-     path_to_file = f"../done/{file}"
+@bp.route('/getFile/<id>', methods=['GET'])
+def getFile( id ):
+     path_to_file = f"../data/done/{id}.wav"
 
      return send_file(
          path_to_file, 
