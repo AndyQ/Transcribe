@@ -6,7 +6,7 @@ def getPath(name):
 
     # from whichcraft import which
     path = os.environ.get('PATH')
-    path += ":./instance"
+    path += ":./3rdParty"
     os.environ['PATH'] = path
 
     path = which(name)

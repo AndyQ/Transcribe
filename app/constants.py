@@ -23,8 +23,9 @@ class Paths:
     inprogress = "./data/inprogress"
     done = "./data/done"
     instance = "./instance"
-    whisper = "./instance/whisper"
-    models = "./instance/models"
+    ffmpeg = "./3rdparty/ffmpeg"
+    whisper = "./3rdparty/whisper"
+    models = "./3rdparty/models"
 
     @classmethod
     def list(cls):

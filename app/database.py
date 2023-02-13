@@ -14,11 +14,16 @@ def addItem( task ):
 
     cursor=conn.cursor()
 
-    cursor.execute('INSERT INTO item (title, type, file_name, status) VALUES (?, ?, ?, ?)'
-                 ' RETURNING id',
+    print( task )
+
+    cursor.execute('INSERT INTO item (title, type, file_name, status) VALUES (?, ?, ?, ?)',
                  (task['title'], task['type'], task['file_name'], 'waiting'))
-    row = cursor.fetchone()
+    rowid = cursor.lastrowid
     conn.commit()
+
+    # Get id from last insert
+    cursor.execute('SELECT id FROM item WHERE rowid = ?', (rowid,))
+    row = cursor.fetchone()
     conn.close()
 
     (inserted_id,) = row if row else None

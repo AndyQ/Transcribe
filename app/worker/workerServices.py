@@ -58,7 +58,8 @@ def convertAudioFile(id):
     inputFile = f"{Paths.inprogress}/{id}.wav"
     outputFile = f"{Paths.inprogress}/tmp_{uuid.uuid4().hex}.wav"
 
-    command = f"ffmpeg -y -i {inputFile} -ar 16000 -ac 1 -acodec pcm_s16le {outputFile}"
+    ffmpeg_location = utils.getPath('ffmpeg')
+    command = f"{ffmpeg_location} -y -i {inputFile} -ar 16000 -ac 1 -acodec pcm_s16le {outputFile}"
     print( command )
     rc = subprocess.call(command, shell=True)
     if rc < 0:

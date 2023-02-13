@@ -15,7 +15,7 @@ The transcription can be viewed and listened to  within a generated webpage, and
 ## Requirements
 Note - this has been developed and tested on an M1 Mac.  It should work on other systems but your mileage may vary.
 
-Python 3.8 - other versions may also work
+Python 3.10 - other versions may also work
 ffmpeg (https://ffmpeg.org/download.html) - Required to convert to 16bit mono audio
 whisper.cpp (https://github.com/ggerganov/whisper.cpp)
 
@@ -28,12 +28,29 @@ Install above dependancies
 
 (I'm be working on seeing if I can dynamically do this and maybe create a binding wrapper to directly integrate).
 
-## Setup
+## Setup using Docker
+
+This is the simplest and quickest way to get started.
+
+Install Docker (or compatible alternative)<br>
+Run ```
+docker compose build
+docker compose up```
+
+This will download and setup everything in a local container, and start the server.
+
+You can then access it using `http://localhost:8080`
+
+## Setup forlocally on your machine
+
+There is a setup.sh script provided that will do most of the work but you still need to manually install ffmpeg and build Whisper.cpp.
 
 **Setup automatically (mostly)**
 `./setup.sh`
 
-This will create the virtual environment, install dependancies, create necessary folders and database and download whisper model (base).  You still need to manually install ffpeg and whisper.
+This will create the virtual environment, install dependancies, create necessary folders and database and download whisper model (base).  
+
+**You still need to manually install ffpeg and whisper.**
 
 **Setup Manually**
 
@@ -44,12 +61,14 @@ pip3 install --upgrade pip```
 pip3 install -r requirements.txt
 
 mkdir ./data ./data/waiting ./data/inprogress ./data/done 
-mkdir ./instance ./instance/models
+mkdir ./3rdparty ./3rdparty/models
 
 python3 -m scripts.init-db
 
-wget --quiet --show-progress -O instance/models/ggml-base.bin https://huggingface.co/datasets/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
+wget --quiet --show-progress -O 3rdparty/models/ggml-base.bin https://huggingface.co/datasets/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
 ```
+
+**You still need to manually install ffpeg and whisper.**
 
 ## Usage
 

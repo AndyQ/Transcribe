@@ -7,6 +7,8 @@ from .constants import Status, Paths
 from . import database
 from . import utils
 
+import yt_dlp
+
 def checkAllInstalled():
     ffmpegInstalled = utils.getPath('ffmpeg')
     whisperInstalled = utils.getPath('whisper')
@@ -44,19 +46,27 @@ def getQueueDetails():
 def getNameOfYouTubeVideo(youtubeID):
     inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
 
-    command = f"yt-dlp --get-title {inputFile}"
     try:
-        output = subprocess.check_output(command, shell=True)
-    except subprocess.CalledProcessError as e:
-        
-        if e.returncode < 0:
-            # process was killed by signal
-            return None
-        elif e.returncode > 0:
-            database.updateItemStatus( id, constants.Status.error )
-            return None
+        ydl = yt_dlp.YoutubeDL({})
+        info = ydl.extract_info(inputFile, download=False)
+        return info['title']
+    except Exception as e:
+        print( e )
+        database.updateItemStatus( id, constants.Status.error )
 
-    return output.decode("utf-8").strip()
+    # command = f"yt-dlp --get-title {inputFile}"
+    # try:
+    #     output = subprocess.check_output(command, shell=True)
+    # except subprocess.CalledProcessError as e:
+        
+    #     if e.returncode < 0:
+    #         # process was killed by signal
+    #         return None
+    #     elif e.returncode > 0:
+    #         database.updateItemStatus( id, constants.Status.error )
+    #         return None
+
+    # return output.decode("utf-8").strip()
 
 
 

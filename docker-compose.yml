@@ -1,0 +1,14 @@
+version: '3.7'
+
+services:
+  web:
+    container_name: web
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./app:/app/app:ro
+      - ./instance:/app/instance
+      - ./data:/app/data
