@@ -60,7 +60,6 @@ def convertAudioFile(id):
 
     ffmpeg_location = utils.getPath('ffmpeg')
     command = f"{ffmpeg_location} -y -i {inputFile} -ar 16000 -ac 1 -acodec pcm_s16le {outputFile}"
-    print( command )
     rc = subprocess.call(command, shell=True)
     if rc < 0:
         # process was killed by signal
@@ -72,8 +71,9 @@ def convertAudioFile(id):
     return outputFile
 
 def convertYoutubeFile(id, youtubeID):
-    inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
-
+    #inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
+    inputFile = youtubeID
+    print( inputFile )
     outputFile = f"{Paths.inprogress}/tmp_yt.wav"
 
     ffmpeg_location = utils.getPath('ffmpeg')

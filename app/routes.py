@@ -14,6 +14,7 @@ bp = Blueprint('app', __name__, url_prefix='/')
 @bp.route('/')
 def index():
     allOK = routeServices.checkAllInstalled()
+    print( allOK )
     models = routeServices.getModels()
     queueDetails = routeServices.getQueueDetails()
 
@@ -40,9 +41,12 @@ def transcribe():
         audioFile.save( f"{Paths.waiting}/{id}.wav")
     else:
 
-        ytId = request.form.get('youtubeId')
-        ytName = routeServices.getNameOfYouTubeVideo(ytId)
-        database.addItem({"title": ytName, "type": constants.youtube_type, "file_name": ytId, "status": "waiting"})
+        ytId = request.form.get('youtubeURL')
+        try:
+            ytName = routeServices.getNameOfYouTubeVideo(ytId)
+            database.addItem({"title": ytName, "type": constants.youtube_type, "file_name": ytId, "status": "waiting"})
+        except:
+            return "Error: Could handle find video"
 
     return "Added to queue"
 

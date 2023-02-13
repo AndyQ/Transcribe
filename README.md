@@ -39,6 +39,8 @@ docker compose up```
 
 This will download and setup everything in a local container, and start the server.
 
+It maps
+
 You can then access it using `http://localhost:8080`
 
 ## Setup forlocally on your machine

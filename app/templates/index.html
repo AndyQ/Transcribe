@@ -175,9 +175,7 @@
             } else {
                 var url = $("#youTubeURL").val();
                 
-                // Extract the ID
-                var youtubeId = url.substring(url.indexOf("=") + 1);
-                formData.append('youtubeId', youtubeId);
+                formData.append('youtubeURL', url);
 
             }
     

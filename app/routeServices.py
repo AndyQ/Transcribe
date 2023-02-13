@@ -45,6 +45,7 @@ def getQueueDetails():
 
 def getNameOfYouTubeVideo(youtubeID):
     inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
+    inputFile = youtubeID
 
     try:
         ydl = yt_dlp.YoutubeDL({})
@@ -52,7 +53,6 @@ def getNameOfYouTubeVideo(youtubeID):
         return info['title']
     except Exception as e:
         print( e )
-        database.updateItemStatus( id, constants.Status.error )
 
     # command = f"yt-dlp --get-title {inputFile}"
     # try:
