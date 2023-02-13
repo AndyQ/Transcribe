@@ -43,14 +43,13 @@ def getQueueDetails():
         "error": error,
     }
 
-def getNameOfYouTubeVideo(youtubeID):
-    inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
+def getInfoForYouTubeVideo(youtubeID):
     inputFile = youtubeID
 
     try:
         ydl = yt_dlp.YoutubeDL({})
         info = ydl.extract_info(inputFile, download=False)
-        return info['title']
+        return info
     except Exception as e:
         print( e )
 

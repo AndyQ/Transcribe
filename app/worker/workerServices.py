@@ -36,7 +36,7 @@ def handleTask( task ):
 
 
     elif type == constants.youtube_type:
-        ytName = f"{task['file_name']}.wav"
+        ytName = f"{task['file_name']}"
         fileName = f"{id}.wav"
 
         convertedFile = convertYoutubeFile(id, ytName)
@@ -71,9 +71,7 @@ def convertAudioFile(id):
     return outputFile
 
 def convertYoutubeFile(id, youtubeID):
-    #inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
-    inputFile = youtubeID
-    print( inputFile )
+    inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
     outputFile = f"{Paths.inprogress}/tmp_yt.wav"
 
     ffmpeg_location = utils.getPath('ffmpeg')

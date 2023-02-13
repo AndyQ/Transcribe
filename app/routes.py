@@ -41,10 +41,12 @@ def transcribe():
         audioFile.save( f"{Paths.waiting}/{id}.wav")
     else:
 
-        ytId = request.form.get('youtubeURL')
+        url = request.form.get('youtubeURL')
         try:
-            ytName = routeServices.getNameOfYouTubeVideo(ytId)
-            database.addItem({"title": ytName, "type": constants.youtube_type, "file_name": ytId, "status": "waiting"})
+            info = routeServices.getInfoForYouTubeVideo(url)
+            title = info['title']
+            ytId = info['id']
+            database.addItem({"title": title, "type": constants.youtube_type, "file_name": ytId, "status": "waiting"})
         except:
             return "Error: Could handle find video"
 
