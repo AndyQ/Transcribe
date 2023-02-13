@@ -99,7 +99,7 @@ def watchdog(queue, threads, lock, timeout):
                 lock.acquire()
 
                 # We're going to start a maximum of 2 new threads
-                nrThreadsRequired = min(size - len(threads), 2)
+                nrThreadsRequired = min(size - len(threads), 1)
                 if nrThreadsRequired > 0:
                     # Create and start new worker threads and pass the queue as an argument
                     for i in range(0, nrThreadsRequired):
