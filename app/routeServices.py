@@ -1,12 +1,10 @@
 import os
-import subprocess
 import csv
 
-from . import constants
 from .constants import Status, Paths
 from . import database
 from . import utils
-from urllib.parse import urlencode, urlparse, urlunparse, parse_qs
+from urllib.parse import urlparse, parse_qs
 
 import yt_dlp
 
@@ -46,35 +44,19 @@ def getQueueDetails():
 
 def getInfoForYouTubeVideo(url):
 
-    u = urlparse(url)
-    query = parse_qs(u.query, keep_blank_values=True)
-    query.pop('list', None)
-    query.pop('index', None)
-    u = u._replace(query=urlencode(query, True))
-    print(u)
-
     inputFile = url
 
-    try:
-        ydl = yt_dlp.YoutubeDL({})
-        info = ydl.extract_info(inputFile, download=False)
-        return info
-    except Exception as e:
-        print( e )
-
-    # command = f"yt-dlp --get-title {inputFile}"
-    # try:
-    #     output = subprocess.check_output(command, shell=True)
-    # except subprocess.CalledProcessError as e:
-        
-    #     if e.returncode < 0:
-    #         # process was killed by signal
-    #         return None
-    #     elif e.returncode > 0:
-    #         database.updateItemStatus( id, constants.Status.error )
-    #         return None
-
-    # return output.decode("utf-8").strip()
+    ydl = yt_dlp.YoutubeDL({})
+    info = ydl.extract_info(inputFile, download=False)
+    if info.get('entries') is not None:
+        u = urlparse(url)
+        query = parse_qs(u.query, keep_blank_values=True)
+        index = int(query.get('index',[-1])[0]) - 1
+        if index > 0:
+            info = info['entries'][index]
+        else:
+            raise ValueError("Invalid or missing list index")
+    return info
 
 
 

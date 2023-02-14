@@ -47,8 +47,8 @@ def transcribe():
             title = info['title']
             ytId = info['id']
             database.addItem({"title": title, "type": constants.youtube_type, "file_name": ytId, "status": "waiting"})
-        except:
-            return "Error: Could handle find video"
+        except Exception as e:
+            return f"Error: Could handle find video - {e}"
 
     return "Added to queue"
 
