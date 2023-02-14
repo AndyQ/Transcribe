@@ -81,6 +81,7 @@ def convertYoutubeFile(id, youtubeID):
     ydl_opts = {
         'format': 'bestaudio/best',
         '--ffmpeg-location': ffmpeg_location,
+        'quiet': True,
         'postprocessors': [{  # Extract audio using ffmpeg
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'wav'

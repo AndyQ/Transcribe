@@ -4,7 +4,7 @@ import csv
 from .constants import Status, Paths
 from . import database
 from . import utils
-from urllib.parse import urlparse, parse_qs
+from urllib.parse import urlparse, parse_qs, urlencode
 
 import yt_dlp
 
@@ -44,14 +44,21 @@ def getQueueDetails():
 
 def getInfoForYouTubeVideo(url):
 
-    inputFile = url
+    u = urlparse(url)
+    query = parse_qs(u.query, keep_blank_values=True)
+    index = int(query.get('index',[-1])[0]) - 1
+    if query.get('v') is not None:
+        # remove all values from query dict that aren't v
+        query = {k: v for k, v in query.items() if k == 'v'}
+
+        u = u._replace(query=urlencode(query, True))
+        inputFile = u.geturl()
+    else:
+        inputFile = url
 
     ydl = yt_dlp.YoutubeDL({})
     info = ydl.extract_info(inputFile, download=False)
     if info.get('entries') is not None:
-        u = urlparse(url)
-        query = parse_qs(u.query, keep_blank_values=True)
-        index = int(query.get('index',[-1])[0]) - 1
         if index > 0:
             info = info['entries'][index]
         else:
