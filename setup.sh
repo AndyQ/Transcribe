@@ -25,27 +25,71 @@ if [ "$ver" -ne 3 ]; then
 fi
 
 
+# Check for FFMpeg
+if which ffmpeg > /dev/null 2>&1; then
+    echo "* FFMpeg is installed"
+else
+    echo "* FFMpeg is not installed - please download and install from https://ffmpeg.org/download.html then re-run setup"
+    exit 1
+fi
+
+
 # Create and activate virtual environment, upgrade pip and install dependancies
+echo "* setting up virtual environment...."
 if [ ! -d "./venv" ]; then
     python3 -m venv venv
 fi
-. ./venv/bin/activate
-pip3 install --upgrade pip
-pip3 install -r requirements.txt
 
-# Create data folders and sqlite database
-if [ ! -d "./data" ]; then
-    mkdir ./data ./data/waiting ./data/inprogress ./data/done  instance
+if [ ! -d "./venv/bin/activate" ]; then
+    . ./venv/bin/activate
+    pip3 install --upgrade pip > /dev/null 2>&1 
+    pip3 install -r requirements.txt > /dev/null
+    if [ $? -ne 0 ]; then
+        printf "Failed to install python dependancies\n"
+        printf "Please try again later or install them manually.\n"
+        exit 1
+    fi
+else
+    echo "* Virtual environment is already setup"
 fi
 
+# Create data folders 
+if [ ! -d "./data" ]; then
+    mkdir ./data ./data/waiting ./data/inprogress ./data/done instance
+fi
+
+# Create folder for 3rd party files
 if [ ! -d "./3rdparty" ]; then
     mkdir ./3rdparty ./3rdparty/models
 fi
 
-python3 -m scripts.init-db
+# Create sqlite database
+if [ ! -f "./instance/database.db" ]; then
+    echo "* Creating database..."
+    python3 -m scripts.init-db
+fi
 
+# Build whisper
+if [ ! -f "./3rdparty/whisper" ]; then
+    echo "* Building whisper.cpp...."
+    git clone https://github.com/ggerganov/whisper.cpp.git > /dev/null 2>&1 
+    cd ./whisper.cpp || exit
+    if ! make > /dev/null 2>&1 
+    then
+        printf "Failed to build whisper.cpp\n"
+        printf "Please try again later or build it yourself.\n"
+        exit 1
+    fi
+    mv main ../3rdparty/whisper
+    cd ..
+    # Cleanup
+    rm -rf ./whisper.cpp
+else
+    echo "* Whisper is already built"
+fi
 # Download the Whisper base model
-if [ ! -f "./3rdparty/ggml-$model.bin" ]; then
+if [ ! -f "./3rdparty/models/ggml-base.bin" ]; then
+    echo "Downloading whisper base model"
     src="https://huggingface.co/datasets/ggerganov/whisper.cpp"
     pfx="resolve/main/ggml"
     model="base"
@@ -67,4 +111,6 @@ fi
 
 echo "The base model has been installed.  If you wish to use other models please see https://github.com/ggerganov/whisper.cpp"
 echo ""
-echo "You need to download and install ffmpeg andwhisper.cpp"
+echo "Please start the server using run.sh"
+echo ""
+echo "Then access using a web browser at http://localhost:8080"

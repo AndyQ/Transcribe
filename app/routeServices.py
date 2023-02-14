@@ -6,6 +6,7 @@ from . import constants
 from .constants import Status, Paths
 from . import database
 from . import utils
+from urllib.parse import urlencode, urlparse, urlunparse, parse_qs
 
 import yt_dlp
 
@@ -33,7 +34,7 @@ def getQueueDetails():
     items = database.getItems()   
     done = [x for x in items if x['status'] == Status.complete]
     inprogress = [x for x in items if x['status'] == Status.inprogress]
-    waiting = [x for x in items if x['status'] == Status.waiting]
+    waiting = [x for x in items if x['status'] == Status.waiting or x['status'] == Status.pending]
     error = [x for x in items if x['status'] == Status.error]
     
     return {
@@ -43,8 +44,16 @@ def getQueueDetails():
         "error": error,
     }
 
-def getInfoForYouTubeVideo(youtubeID):
-    inputFile = youtubeID
+def getInfoForYouTubeVideo(url):
+
+    u = urlparse(url)
+    query = parse_qs(u.query, keep_blank_values=True)
+    query.pop('list', None)
+    query.pop('index', None)
+    u = u._replace(query=urlencode(query, True))
+    print(u)
+
+    inputFile = url
 
     try:
         ydl = yt_dlp.YoutubeDL({})

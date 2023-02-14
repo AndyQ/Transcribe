@@ -9,7 +9,5 @@ def getPath(name):
         path += ":./3rdparty"
     os.environ['PATH'] = path
 
-    print( f"path - {path}" )
-
     path = which(name)
     return None if path is None else path

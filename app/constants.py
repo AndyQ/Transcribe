@@ -23,7 +23,6 @@ class Paths:
     inprogress = "./data/inprogress"
     done = "./data/done"
     instance = "./instance"
-    ffmpeg = "./3rdparty/ffmpeg"
     whisper = "./3rdparty/whisper"
     models = "./3rdparty/models"
 

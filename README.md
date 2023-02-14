@@ -30,7 +30,7 @@ Install above dependancies
 
 ## Setup using Docker
 
-This is the simplest and quickest way to get started.
+This is the simplest and quickest way to get started. BUT it is quite slow
 
 Install Docker (or compatible alternative)<br>
 Run ```
@@ -39,20 +39,21 @@ docker compose up```
 
 This will download and setup everything in a local container, and start the server.
 
-It maps
+It maps the data and instance folders to volumes locally so when the container is re-created you don't lose any
+previous transcriptions
 
 You can then access it using `http://localhost:8080`
 
-## Setup forlocally on your machine
+## Setup for running locally on your machine
 
-There is a setup.sh script provided that will do most of the work but you still need to manually install ffmpeg and build Whisper.cpp.
+There is a setup.sh script provided that will do most of the work but you still need to manually install ffmpeg first.
 
 **Setup automatically (mostly)**
 `./setup.sh`
 
 This will create the virtual environment, install dependancies, create necessary folders and database and download whisper model (base).  
 
-**You still need to manually install ffpeg and whisper.**
+**You still need to manually install ffpeg.**
 
 **Setup Manually**
 
