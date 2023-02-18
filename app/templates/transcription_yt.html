@@ -6,12 +6,41 @@
         <style type="text/css" media="screen">
             /* unvisited link */    
     
-.transcription{
+            body {
+                display: flex;
+                flex-direction: column;
+                max-height: 100vh;       /* body takes whole viewport's height */
+
+            }
+            main {
+                flex: 1 1;
+                overflow: auto;
+            }
+
+            .videoDiv {
+                max-width: 1024px;
+            }
+
+            .video-container {
+                position: relative;
+                padding-bottom: 56.25%;
+            }
+
+            .video-container iframe {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+
+.transcription2{
     flex-grow: 1;
-    height: calc(100vh - 80px);
+    height: 100% /*calc(100vh - 80px)*/;
     max-height: 100%;
     position: relative;
     top: 0;
+    display: block;
     overflow-y: auto;
     overflow-x: hidden;
 }
@@ -19,34 +48,35 @@
 
     </head>
 <body>
-    <div class="container-fluid">
         <div style="height:20px;"></div>
-        <div class="row" style="height:60px;">
-            <div class="col-1"></div>
-            <div class="col-11">
+        <div class="header text-center">
+            <div class="col">
                 <h1 class="txt-dark">{{title}}</h1>
             </div>
         </div>
         <div style="height:20px;"></div>
+
         <div class="row">
-            <div class="col-1"></div>
-            <div class="col-5 transcription">
-                {% for item in transcription %}
-                <div class="segment" id="segment{{loop.index0}}" style="font-weight: normal;">
-                    <p id="0">
-                        {{item[0] | format_millis}}
-                        <a onclick="pause()">◼</a>
-                        &nbsp;
-                        <a onclick="seek( {{item[0] | to_secs}} );">►</a>
-                        {{item[2]}}
-                    </p>
+            <div class="videoDiv mx-auto">
+                <div class=" ms-3 me-3 video-container">
+                    <div id="yt-player"></div>
                 </div>
-                {% endfor %}
-            </div>
-            <div class="col-6">
-                <div id="yt-player"></div>
             </div>
         </div>
+        <main class="mx-auto mt-2 ms-4 me-4 transcription">
+            {% for item in transcription %}
+            <div class="segment" id="segment{{loop.index0}}" style="font-weight: normal;">
+                <p id="0">
+                    {{item[0] | format_millis}}
+                    <a onclick="pause()">◼</a>
+                    &nbsp;
+                    <a onclick="seek( {{item[0] | to_secs}} );">►</a>
+                    {{item[2]}}
+                </p>
+            </div>
+            {% endfor %}
+
+        </main>
     </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
@@ -79,8 +109,8 @@ function seek(sec){
 var player = null;
 function onYouTubeIframeAPIReady() {
     player = new YT.Player("yt-player", {
-        height: "390",
-        width: "640",
+        width: "854",
+        height: "480",
         videoId: "{{file}}"
     });
 
@@ -123,9 +153,12 @@ function onYouTubeIframeAPIReady() {
                         }
 
                         var parentDiv =  $('.transcription');
-                        var innerListItem =  $('#segment{{loop.index0}}');
-                        if (!checkIfInView(innerListItem)) {
-                            parentDiv.scrollTop(parentDiv.scrollTop() + (innerListItem.position().top - parentDiv.position().top) - (parentDiv.height()/2) + (innerListItem.height()/2)  )
+                        var el =  $('#segment{{loop.index0}}');
+                        if (!checkIfInView(el)) {
+                            console.log( "item not in view!")
+                            var topPos = el.offset().top + parentDiv.scrollTop();
+
+                            parentDiv.scrollTop( topPos - parentDiv.offset().top - (parentDiv.height() - 100) );
                         }
                         lastBold = next;
                         lastBold.style.fontWeight = "bold"; 
@@ -141,11 +174,11 @@ function onYouTubeIframeAPIReady() {
     function checkIfInView(element){
         var parentDiv =  $('.transcription');
 
+        return (element.offset().top + element.height()) - parentDiv.offset().top <= (parentDiv.height() - (element.height()*2));
+
         var offset = element.offset().top - $(window).scrollTop();
 
         if(offset > window.innerHeight - 150 ){
-            // Not in view so scroll to it
-            // $('html,body').animate({scrollTop: offset}, 1000);
             return false;
         }
         return true;

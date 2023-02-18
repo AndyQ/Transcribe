@@ -32,7 +32,7 @@ def addItem( task ):
 def getItems():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT * FROM item')
+    cur.execute('SELECT * FROM item order by status_updated desc')
     rows = [dict(row) for row in cur.fetchall()]
     conn.close()
 

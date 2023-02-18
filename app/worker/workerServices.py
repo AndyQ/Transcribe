@@ -42,7 +42,7 @@ def handleTask( task ):
         convertedFile = convertYoutubeFile(id, ytName)
         if convertedFile == None:
             return
-        transcriptionFile = transcribe(convertedFile, fileName)
+        transcriptionFile = transcribe(id, convertedFile, fileName)
         if transcriptionFile == None:
             return
 
@@ -72,7 +72,7 @@ def convertAudioFile(id):
 
 def convertYoutubeFile(id, youtubeID):
     inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
-    outputFile = f"{Paths.inprogress}/tmp_yt.wav"
+    outputFile = f"{Paths.inprogress}/tmp_yt"
 
     ffmpeg_location = utils.getPath('ffmpeg')
 
@@ -104,9 +104,9 @@ def convertYoutubeFile(id, youtubeID):
             database.updateItemStatus( id, constants.Status.error )
             return None
 
-    return outputFile
+    return outputFile+".wav"
 
-def transcribe(inputFile, saveAs):
+def transcribe(id, inputFile, saveAs):
     outputFile = f"{Paths.done}/{saveAs}"
 
     command = f"{Paths.whisper} -f {inputFile}  -m {Paths.models}/ggml-base.bin -ocsv -of {outputFile}"
@@ -116,5 +116,4 @@ def transcribe(inputFile, saveAs):
         return None
     elif rc > 0:
         database.updateItemStatus( id, constants.Status.error )
-        return None
     return outputFile + ".csv"
