@@ -4,11 +4,11 @@
             
             <div v-if="type == 'completed'">
                 <i @click="deleteItem(item.id)" v-if="type == 'completed'" class="deleteItem fa-solid fa-trash"></i> 
-                <router-link :to="{ name: 'viewTranscription', params: { id : item.id } }" target="_blank">{{ item.title }}</router-link>
+                <router-link :to="{ name: 'viewTranscription', params: { id : item.id } }" target="_blank"><p class="text">{{ item.title }}</p></router-link>
             </div>
             <div v-else>
                 <i @click="deleteItem(item.id)" v-if="type == 'completed'" class="deleteItem fa-solid fa-trash"></i> 
-                <span>{{item.title}}</span>
+                <p class="text">{{item.title}}</p>
             </div>
 
         </span>
@@ -47,6 +47,18 @@ export default {
     font-weight: normal;
     font-size: 1.2em;
     line-height: 2em;
+}
+
+.item i {
+    cursor: pointer;
+}
+.item p {
+    display: inline;
+}
+.item a {
+    margin-left:20px;
+    text-decoration: none;
+    cursor: pointer;
 }
 
 </style>
