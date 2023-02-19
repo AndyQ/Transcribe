@@ -73,6 +73,20 @@ def showTranscription( id ):
     }
     return render_template(page, **context)
 
+@bp.route('/getItem/<id>', methods=['GET'])
+def getItem( id ):
+    item = database.getItem(id)
+    transcription = routeServices.loadTranscription( item['transcription_file'] )
+    context = {
+        "title" : item['title'],
+        "file" : item['file_name'],
+        "id" : item['id'],
+        "transcription" : transcription,
+    }
+
+    return context
+
+
 @bp.route('/getFile/<id>', methods=['GET'])
 def getFile( id ):
      path_to_file = f"../data/done/{id}.wav"

@@ -171,12 +171,11 @@
 
             // If the selectedFileName field isn't hidden
             if ( $("#selectedFileName").is(":visible") ) {
-                formData.append('file', $('#fileSelect')[0].files[0]);
+                formData.append('file', this.FILE)
             } else {
                 var url = $("#youTubeURL").val();
                 
                 formData.append('youtubeURL', url);
-
             }
     
             $.ajax({

@@ -72,11 +72,12 @@ def loadTranscription( file ):
     with open( file, 'r' ) as f:
         reader = csv.reader(f, quotechar='"', delimiter=',',
                      quoting=csv.QUOTE_ALL, skipinitialspace=True)
-        transcription = list(reader)
+        contents = list(reader)
 
-    for i in range( len( transcription ) ):
-        transcription[i][0] = int(transcription[i][0])
-        transcription[i][1] = int(transcription[i][1])
+    transcription = []
+    for i in range( len( contents ) ):
+        item = { 'id': i, 'start':  int(contents[i][0]), 'end': int(contents[i][1]), 'text': contents[i][2]}
+        transcription.append( item )
     return transcription
     
 

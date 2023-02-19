@@ -10,11 +10,12 @@
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
+            "cwd":"${workspaceFolder}",
             "jinja": true,
             "justMyCode": true,
             "env": {
                 "FLASK_DEBUG": "1",
-                "FLASK_RUN_PORT": "8080",
+                "FLASK_RUN_PORT": "8081",
                 "FLASK_RUN_HOST": "0.0.0.0"
             }
         },
