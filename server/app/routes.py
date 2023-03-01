@@ -1,6 +1,6 @@
 from flask import (
     Blueprint, redirect, render_template, request,
-    send_file
+    send_file, current_app
 )
 
 from . import routeServices
@@ -10,8 +10,14 @@ from .constants import Paths
 
 bp = Blueprint('app', __name__, url_prefix='/')
 
-
 @bp.route('/')
+def home():
+    context = {}
+
+    return render_template('home.html', **context)
+
+
+@bp.route('/test')
 def index():
     allOK = routeServices.checkAllInstalled()
     print( allOK )

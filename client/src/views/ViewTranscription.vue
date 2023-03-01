@@ -236,6 +236,7 @@ window.addEventListener("message", function(event) {
 
 <style>
 
+
     .ViewTranscription {
         display: flex;
         flex-direction: column;

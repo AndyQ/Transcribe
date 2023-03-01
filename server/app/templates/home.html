@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="{{url_for('static', filename='fontawesome/css/fontawesome.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='fontawesome/css/brands.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='fontawesome/css/regular.css')}}" rel="stylesheet">
+    <link href="{{url_for('static', filename='fontawesome/css/solid.css')}}" rel="stylesheet">
+<style>
+        body {
+            font-family: Avenir, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-align: center;
+            color: #2c3e50;
+        }
+
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+        
+        .transcribe {
+          height: 150px;
+        }
+    
+        .title {
+          --column-width : calc(33.33% - (var(--margin) / var(--column-count)));
+          --column-count :3; 
+          --margin : 20px;
+    
+          width: calc(100% - (2 * var(--margin)));
+          margin-left: var(--margin);
+           display:flex; 
+           flex-direction : row; 
+           justify-content : space-between; 
+        }   
+    
+        .queues {
+            position: absolute;
+            bottom: 80px; /* same as footer height */
+            width: 100%; 
+    
+            --column-width : calc(33.33% - (var(--margin) / var(--column-count)));
+            --column-count :3; 
+            --margin : 20px;
+    
+            width: calc(100% - (2 * var(--margin)));
+            margin-left: var(--margin);
+                    
+            display:flex; 
+            flex-direction : row; 
+            justify-content : space-between; 
+           
+         }
+         
+         .queue {
+            width: calc(100% - (2 * var(--margin)));
+            overflow-y : auto; 
+            margin-left: 20px;
+            margin-right: 20px;
+            text-align: left;
+        }
+    
+        /* Transcribe */
+        .hidden {
+            display: none;
+        }
+
+        .mainButton2 {
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and IE 11 */
+            user-select: none; /* Standard syntax */
+
+            display: inline-block;
+            background-color: #3D5164;
+            color: white;
+            font-weight: 600;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 10px 0 20px 20px ;
+        }
+
+        .mainButton {
+            -webkit-user-select: none; /* Safari */
+            -ms-user-select: none; /* IE 10 and IE 11 */
+            user-select: none; /* Standard syntax */
+
+            display: inline-block;
+            background-color: #3D5164;
+            color: white;
+            font-weight: 600;
+            border-radius: 5px;
+            padding: 10px 20px;
+            margin: 20px 5px;
+        }
+
+        .mainButton:hover,
+        .mainButton2:hover {
+            background-color: #212d37;
+            color: white;
+        }
+
+        .url {
+            text-align: center;
+            justify-content: center;
+            line-height: 2em;;
+        }
+
+        .selectedFileName {
+            text-align: center;
+            justify-content: center;
+            line-height: 2em;;
+            color: #555;
+            padding: 10px 6px;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            display: inline-flex;
+        }
+
+        input {
+            text-align: center;
+            justify-content: center;
+            font-size: 18px;
+            padding: 10px 6px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: none;
+            border-bottom: 1px solid #ddd;
+            color: #555;
+            width: 400px;
+        }
+
+        /* Queue */
+        .item {
+            color: #3D5164;
+            font-weight: normal;
+            font-size: 1.2em;
+            line-height: 2em;
+        }
+
+        .item i {
+            cursor: pointer;
+        }
+        .item p {
+            display: inline;
+        }
+        .item a {
+            margin-left:20px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="Home">
+        <div ref="transcribe" class="transcribe">
+            <div>
+
+                <!-- component -->
+                <label class="mainButton">
+                    <span><i class="fa-solid fa-cloud-arrow-up"></i> File</span>
+                    <input id="selectFile" accept="audio/*, video/*" type="file" class="hidden">
+                </label>
+        
+                <label  id="youtubeSelect" class="mainButton">
+                    <span><i class="fa-brands fa-youtube"></i> YouTube</span>
+                </label>
+        
+                <label @click="submitJob" id="transcribe" class="mainButton2 ">
+                    <span><i class="fa-regular fa-comment"></i> Transcribe</span>
+                </label>
+
+                <div id="youTube" class="hidden">
+                    <input ref="youTubeURL" id="youTubeURL" class="url" type="text" size="40" placeholder="Paste the YouTube URL here">
+                </div>
+                <div id="selectedFile" class="hidden">
+                    <span id="selectedFileName" class="selectedFileName">Selected file:  </span>
+                </div>
+            </div>
+        </div>
+
+        <div id="title" class="title">
+            <div class="queue">
+                <h1>Waiting</h1>
+            </div>
+            <div class="queue">
+                <h1>Processing</h1>
+            </div>
+            <div class="queue">
+                <h1>Complete</h1>
+            </div>
+        </div>
+
+        <div id="queues" class="queues">
+            <div class="queue">
+                <div id="waitingItems" class="items">
+                    {% for item in waiting %}
+                    <span class="item">
+                        
+                        <i @click="deleteItem(item.id)" v-if="type == 'completed'" class="deleteItem fa-solid fa-trash"></i> 
+                        <p class="text">{{item.title}}</p>
+            
+                    </span>
+                    {% endfor %}
+              </div>
+            
+            </div>
+            <div class="queue">
+                <div id="processingItems" class="items">
+                    {% for item in processing %}
+                    <span class="item">
+                        
+                        <i @click="deleteItem(item.id)" v-if="type == 'completed'" class="deleteItem fa-solid fa-trash"></i> 
+                        <p class="text">{{item.title}}</p>
+            
+                    </span>
+                    {% endfor %}
+              </div>
+            </div>
+            <div class="queue">
+                <div id="completedItems" class="items"></div>
+            </div>
+        </div>
+    </div>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script>
+    $(function () {
+    
+
+        function updateViews() {
+            var titles = $('#title');
+            var queues = $('#queues');
+            
+            // get header height
+            var headerTop = titles.offset().top;
+            var headerHeight = titles.height();
+            
+            // get header2 height
+            var header2Top = headerTop + headerHeight;
+            
+            // set container top margin to header height
+            $("#queues").offset({ top: header2Top });
+        };
+
+        $('#selectFile').on("change", function() { 
+                let name = $('#selectFile')[0].files[0]['name']
+                $("#selectedFileName").text( "Selected file: " + name );
+                $("#youTube").hide();
+                $("#selectedFile").show();
+        });
+    
+        $('#youtubeSelect').click( function() { 
+                $("#youTube").show();
+                $("#selectedFile").hide();
+        });
+    
+        $( "#transcribe" ).click(function() {
+            var formData = new FormData();
+
+            // If the selectedFileName field isn't hidden
+            if ( $("#selectedFile").is(":visible") ) {
+                let file = $('#selectFile')[0].files[0]
+                formData.append('file', file)
+            } else {
+                var url = $("#youTubeURL").val();
+                formData.append('youtubeURL', url);
+            }
+    
+            $.ajax({
+                url : 'addItem',
+                type : 'POST',
+                data : formData,
+                processData: false,  // tell jQuery not to process the data
+                contentType: false,  // tell jQuery not to set contentType
+                success : function(data) {
+                    console.log(data);
+                    // const toastLiveExample = document.getElementById('liveToast')
+                    // const toastElement = $('#liveToast');
+                    //     const text = $('#toastBody');
+                    //     text.text("Added item to queue" );
+                    // const toast = new bootstrap.Toast(toastElement)
+                    // toast.show()
+                }
+            });
+        });
+
+        $('body').on('click', '.deleteItem', function() {
+
+            var id = $(this).data('id');
+            $.ajax({
+                url : 'deleteItem',
+                type : 'POST',
+                data : {id: id},
+                success : function(data) {
+                    console.log(data);
+                    if ( data.status == "ok" ) {}
+                        //const toastElement = document.getElementById('liveToast')
+                        const toastElement = $('#liveToast');
+                        const text = $('#toastBody');
+                        text.text("Deleted item " + id);
+                        const toast = new bootstrap.Toast(toastElement)
+
+                        toast.show()
+                        $(this).remove()
+                }
+            });
+        });
+    
+        function updateQueues( ) {
+            $.ajax({
+                url : 'getQueueDetails',
+                type : 'GET',
+                success : function(data) {
+                    $("#waitingItems").empty();
+                    $("#processingItems").empty();
+                    $("#completedItems").empty();
+    
+                    for (var i = 0; i < data['waiting'].length; i++) {
+                        let item = data['waiting'][i];
+
+                        let el = `<span class="item"><div>
+                                    <p class="text">${item.title}</p>
+                                </div></span>`;
+                        $("#waitingItems").append(el);
+
+                    }
+                    if ( data['error'].length > 0 )
+                        $("#waitingItems").append( "<br><p class='text-red font-bold text-left'>Errors:</p>")
+
+                        for (var i = 0; i < data['error'].length; i++) {
+                            let item = data['error'][i];
+                            let el = `<span class="item"><div>
+                                    <i data-id="${item.id}"  class="deleteItem fa-solid fa-trash"></i> 
+                                    <p class="text">${item.title}</p>
+                                </div></span>`;
+
+                            $("#waitingItems").append(el);
+
+                            //$("#waitingItems").append(`<p><a href="/delete/${data['error'][i].id}"><i class="fa-solid fa-trash"></i></a> - <span class="text-red text-left">${data['error'][i].title}</span></p>`);
+                        }
+                    for (var i = 0; i < data['inprogress'].length; i++) {
+                        let item = data['waiting'][i];
+
+                        let el = `<span class="item"><div>
+                                    <p class="text">${item.title}</p>
+                                </div></span>`;
+                        $("#processingItems").append(el);
+                    }
+
+                    for (var i = 0; i < data['done'].length; i++) {
+                        let item = data['done'][i];
+
+                        let el = `<span class="item"><div>
+                                    <i data-id="${item.id}" class="deleteItem fa-solid fa-trash"></i> 
+                                    <a target="_blank" href="/showTranscription/${item.id}"><p class="text">${item.title}</p></a>
+                                </div></span>`;
+
+                        $("#completedItems").append(el);
+                    }
+                }
+            });
+        }
+    
+        updateViews();
+        updateQueues();
+        setInterval(updateQueues,10000);
+    });
+</script>        
+</body>
+</html>

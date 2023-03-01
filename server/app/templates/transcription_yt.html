@@ -2,72 +2,89 @@
     <head>
         <title>Transcription for {{title}}</title>
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
-        <link rel="stylesheet" href="{{url_for('static', filename='style.css')}}">
         <style type="text/css" media="screen">
-            /* unvisited link */    
-    
-            body {
-                display: flex;
-                flex-direction: column;
-                max-height: 100vh;       /* body takes whole viewport's height */
 
-            }
-            .transcription {
-                flex: 1 1;
-                overflow: auto;
-            }
+    body {
+            font-family: Avenir, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-align: center;
+            color: #2c3e50;
+        }
 
-            .videoDiv {
-                max-width: 1024px;
-            }
+    .ViewTranscription {
+        display: flex;
+        flex-direction: column;
+        max-height: 100vh;       /* body takes whole viewport's height */
 
-            .video-container {
-                position: relative;
-                padding-bottom: 56.25%;
-            }
+    }
 
-            .video-container iframe {
-                position: absolute;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-            }
+    .transcriptionWrapper2 {
+        bottom: 100px;
+    }
 
+    .transcription {
+        flex: 1;
+        overflow: auto;
+        text-align: left;
+        margin: 10px 50px 0px 50px;
+    }
+
+    .videoDiv {
+        max-width: 1024px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .video-container {
+        position: relative;
+        padding-bottom: 56.25%;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .video-container iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+    }
         </style>
 
     </head>
-<body>
-        <div style="height:20px;"></div>
-        <div class="header text-center">
-            <div class="col">
-                <h1 class="txt-dark">{{title}}</h1>
-            </div>
-        </div>
-        <div style="height:20px;"></div>
-
-        <div class="row">
-            <div class="videoDiv mx-auto">
-                <div class=" ms-3 me-3 video-container">
-                    <div id="yt-player"></div>
+    <body>
+        <div class="ViewTranscription">
+            <div style="height:20px;"></div>
+            <div class="header text-center">
+                <div class="col">
+                    <h1 class="txt-dark">{{title}}</h1>
                 </div>
             </div>
-        </div>
-        <div class="mx-auto mt-2 ms-4 me-4 transcription">
-            {% for item in transcription %}
-            <div class="segment" id="segment{{loop.index0}}" style="font-weight: normal;">
-                <p id="0">
-                    {{item.start | format_millis}}
-                    <a onclick="pause()">◼</a>
-                    &nbsp;
-                    <a onclick="seek( {{item.start | to_secs}} );">►</a>
-                    {{item.text}}
-                </p>
-            </div>
-            {% endfor %}
+            <div style="height:20px;"></div>
 
+            <div class="row">
+                <div class="videoDiv mx-auto">
+                    <div class=" ms-3 me-3 video-container">
+                        <div id="yt-player"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="mx-auto mt-2 ms-4 me-4 transcription">
+                {% for item in transcription %}
+                <div class="segment" id="segment{{loop.index0}}" style="font-weight: normal;">
+                    <p id="0">
+                        {{item.start | format_millis}}
+                        <a onclick="pause()">◼</a>
+                        &nbsp;
+                        <a onclick="seek( {{item.start | to_secs}} );">►</a>
+                        {{item.text}}
+                    </p>
+                </div>
+                {% endfor %}
+
+            </div>
         </div>
-    </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
@@ -134,28 +151,33 @@ function onYouTubeIframeAPIReady() {
                 var time = data.info.currentTime;
 
                 {% for item in transcription %}
-                if(time < {{item.end| to_secs}}) {
+                    if (time < {{item.end| to_secs}}) {
 
-                    var next = document.getElementById("segment{{loop.index0}}");
-                    if ( next != lastBold ) {
-                        if(lastBold) {
-                        lastBold.style.fontWeight = "normal";
-                        }
+                        // var segment = document.getElementById("segment{{loop.index0}}");
+                        var segment = $("#segment{{loop.index0}}");
+                        if ( !segment.is(lastBold) ) {
+                            if(lastBold) {
+//                                lastBold.style.fontWeight = "normal";
+                                lastBold.css('font-weight', 'normal');
+                            }
 
-                        var parentDiv =  $('.transcription');
-                        var el =  $('#segment{{loop.index0}}');
-                        if (!checkIfInView(el)) {
-                            console.log( "item not in view!")
-                            var topPos = el.offset().top + parentDiv.scrollTop();
+                            if (!checkIfInView(segment)) {
+                                var parentDiv =  $('.transcription');
+                                console.log( "item not in view!")
 
-                            parentDiv.scrollTop( topPos - parentDiv.offset().top - (parentDiv.height() - 100) );
-                        }
-                        lastBold = next;
-                        lastBold.style.fontWeight = "bold"; 
-                    }                    
+                                // const itemRelativePos = (segment.offset().top-parentDiv.offset().top)-parentDiv.scrollTop()
 
-                    return;
-                }
+                                // parentDiv.scrollTop( itemRelativePos - (parentDiv.height() - (segment.height()-100)) );
+
+                                var topPos = segment.offset().top + parentDiv.scrollTop();
+                                parentDiv.scrollTop( topPos - parentDiv.offset().top - (parentDiv.height() - 100) );
+                            }
+                            lastBold = segment;
+                            lastBold.css('font-weight', 'bold');
+                        }                    
+
+                        return;
+                    }
                 {% endfor %}
             }
         }
@@ -163,6 +185,13 @@ function onYouTubeIframeAPIReady() {
 
     function checkIfInView(element){
         var parentDiv =  $('.transcription');
+
+        // const itemRelativePos = (element.offset().top-parentDiv.offset().top)-parentDiv.scrollTop();
+        //     if ( itemRelativePos > parentDiv.height() - (element.height()*3) ) {
+        //         return false;
+        //     }
+        // return true;
+
 
         return (element.offset().top + element.height()) - parentDiv.offset().top <= (parentDiv.height() - (element.height()*2));
 

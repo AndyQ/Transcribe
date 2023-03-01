@@ -68,6 +68,7 @@ export default {
                 .then (res => res.json() )
                 .then(data => {
                     let serviceData = data
+                    console.log( "sd - " + JSON.stringify(serviceData))
                     this.waiting = serviceData.waiting
                     this.processing = serviceData.inprogress
                     this.completed = serviceData.done
@@ -80,6 +81,8 @@ export default {
 
         this.updateQueues()
         setInterval(this.updateQueues,1000);
+
+        // get data
     },
     created() {
         this.$emit('update:layout', markRaw(LayoutDefault));

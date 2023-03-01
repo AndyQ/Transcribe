@@ -2,7 +2,7 @@
     <div class="items" v-for="item in data" :key="item.id">
         <span class="item">
             
-            <div v-if="type == 'completed'">
+            <div @click="openTranscription(item.id)" v-if="type == 'completed'">
                 <i @click="deleteItem(item.id)" v-if="type == 'completed'" class="deleteItem fa-solid fa-trash"></i> 
                 <router-link :to="{ name: 'viewTranscription', params: { id : item.id } }" target="_blank"><p class="text">{{ item.title }}</p></router-link>
             </div>
