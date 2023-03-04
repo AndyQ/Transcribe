@@ -1,5 +1,6 @@
 import os
 import csv
+import shutil
 
 from .constants import Status, Paths
 from . import database
@@ -42,6 +43,11 @@ def getQueueDetails():
         "error": error,
     }
 
+def createFolder( id ):
+    path = f"{Paths.data}/{id}"
+    if not os.path.exists(path):
+        os.makedirs(path)
+
 def getInfoForYouTubeVideo(url):
 
     u = urlparse(url)
@@ -82,14 +88,9 @@ def loadTranscription( file ):
     
 
 def deleteItem( id ):
-    item = database.getItem( id )
+    path = f'{Paths.data}/{id}'
+    if os.path.exists(path):
+        shutil.rmtree( path )
 
-    for path in ['./data/waiting/','./data/inprogress/','./data/done/']:
-        file =  path + id + ".wav" 
-        if os.path.exists(file):
-            os.remove(file)
-
-    if item['transcription_file'] != None and os.path.exists( item['transcription_file']):
-        os.remove( item['transcription_file'] )
     database.deleteItem( id )
 

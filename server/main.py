@@ -12,4 +12,4 @@ if __name__ == "__main__":
         watchdog.start_watchdog()
         atexit.register(watchdog.stop_watchdog)
 
-    app.run(debug=True, host="0.0.0.0", port=8081)
+    app.run(debug=True, host="0.0.0.0", port=8080)

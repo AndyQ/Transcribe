@@ -125,11 +125,11 @@ def get_jobs_from_database():
     # if file not in DB then delete it
     inprogress = database.getItemsWithStatus(Status.inprogress)
     for item in inprogress:
-        if item['type'] == constants.audio_type:
+        if item['type'] == constants.audio_type or item['type'] == constants.video_type:
             id = item['id']
-            if os.path.exists(f"{Paths.inprogress}/{id}.wav" ):
+            file_name = item['file_name']
+            if os.path.exists(f"{Paths.data}/{id}/{file_name}" ):
                 print( f"Resetting job {id} back to waiting")
-                os.rename(f"{Paths.inprogress}/{id}.wav", f"{Paths.waiting}/{id}.wav")
                 database.updateItemStatus(id, Status.waiting)
             else:
                 print( f"Removing job {id} as source file not found")
@@ -139,10 +139,10 @@ def get_jobs_from_database():
             # youtube file, reset to pending
             database.updateItemStatus(item['id'], Status.waiting)
 
-    # now delete any remaining files in the inprogress folder
-    for filename in os.listdir(Paths.inprogress):
-        print( f"cleaning up {filename} - not in DB!")
-        os.remove(f"{Paths.inprogress}/{filename}")
+    # # now delete any remaining files in the inprogress folder
+    # for filename in os.listdir(f"{Paths.data"):
+    #     print( f"cleaning up {filename} - not in DB!")
+    #     os.remove(f"{Paths.inprogress}/{filename}")
 
     pending = database.getItemsWithStatus(Status.pending)
     waiting = database.getItemsWithStatus(Status.waiting)

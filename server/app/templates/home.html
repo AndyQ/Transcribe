@@ -345,7 +345,7 @@
                             //$("#waitingItems").append(`<p><a href="/delete/${data['error'][i].id}"><i class="fa-solid fa-trash"></i></a> - <span class="text-red text-left">${data['error'][i].title}</span></p>`);
                         }
                     for (var i = 0; i < data['inprogress'].length; i++) {
-                        let item = data['waiting'][i];
+                        let item = data['inprogress'][i];
 
                         let el = `<span class="item"><div>
                                     <p class="text">${item.title}</p>
@@ -369,7 +369,7 @@
     
         updateViews();
         updateQueues();
-        setInterval(updateQueues,10000);
+        setInterval(updateQueues,1000);
     });
 </script>        
 </body>

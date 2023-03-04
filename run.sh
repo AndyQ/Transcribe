@@ -1,7 +1,4 @@
-cd client
-npm run serve & pid1="$!" 
-
-cd ../server
+cd server
 . ./venv/bin/activate
 python main.py
 

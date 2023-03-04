@@ -13,31 +13,25 @@ import yt_dlp
 def handleTask( task ):
     type = task['type']
     id = task['id']
+    filename = task['file_name']
 
     database.updateItemStatus(task['id'], Status.inprogress)
-    if type == constants.audio_type:
-        fileName = f"{id}.wav"
-        # first move the file to the working directory
-        workingFile = f"{Paths.inprogress}/{fileName}"
-        os.rename(f"{Paths.waiting}/{fileName}", workingFile)
+    if type == constants.audio_type or type == constants.video_type:
+        workingFile = filename
 
-        convertedFile = convertAudioFile(id)
+        convertedFile = convertAudioFile(id, workingFile)
         if convertedFile == None:
             return
-        transcriptionFile = transcribe(convertedFile, fileName)
+        transcriptionFile = transcribe(id, convertedFile, "transcription")
         if transcriptionFile == None:
             return
 
         # remove tmp file
-        os.remove(convertedFile)
-
-        # move converted file to done
-        os.rename('./data/inprogress/' + fileName, './data/done/' + fileName)
-
+        #os.remove(convertedFile)
 
     elif type == constants.youtube_type:
         ytName = f"{task['file_name']}"
-        fileName = f"{id}.wav"
+        fileName = f"transcription"
 
         convertedFile = convertYoutubeFile(id, ytName)
         if convertedFile == None:
@@ -54,12 +48,12 @@ def handleTask( task ):
     database.updateTranscriptionFile( id, transcriptionFile )
     database.updateItemStatus(id, Status.complete)
 
-def convertAudioFile(id):
-    inputFile = f"{Paths.inprogress}/{id}.wav"
-    outputFile = f"{Paths.inprogress}/tmp_{uuid.uuid4().hex}.wav"
+def convertAudioFile(id, sourceFile):
+    inputFile = f"{Paths.data}/{id}/{sourceFile}"
+    outputFile = f"{Paths.data}/{id}/processed.wav"
 
     ffmpeg_location = utils.getPath('ffmpeg')
-    command = f"{ffmpeg_location} -y -i {inputFile} -ar 16000 -ac 1 -acodec pcm_s16le {outputFile}"
+    command = f"'{ffmpeg_location}' -y -i '{inputFile}' -ar 16000 -ac 1 -acodec pcm_s16le '{outputFile}'"
     rc = subprocess.call(command, shell=True)
     if rc < 0:
         # process was killed by signal
@@ -72,7 +66,7 @@ def convertAudioFile(id):
 
 def convertYoutubeFile(id, youtubeID):
     inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
-    outputFile = f"{Paths.inprogress}/tmp_yt"
+    outputFile = f"{Paths.data}/{id}/processed"
 
     ffmpeg_location = utils.getPath('ffmpeg')
 
@@ -107,9 +101,9 @@ def convertYoutubeFile(id, youtubeID):
     return outputFile+".wav"
 
 def transcribe(id, inputFile, saveAs):
-    outputFile = f"{Paths.done}/{saveAs}"
+    outputFile = f"{Paths.data}/{id}/{saveAs}"
 
-    command = f"{Paths.whisper} -f {inputFile}  -m {Paths.models}/ggml-base.bin -ocsv -of {outputFile}"
+    command = f"{Paths.whisper} -f '{inputFile}'  -m {Paths.models}/ggml-base.bin -ocsv -of '{outputFile}'"
     rc = subprocess.call(command, shell=True)
     if rc < 0:
         # process was killed by signal

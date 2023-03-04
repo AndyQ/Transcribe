@@ -1,3 +1,4 @@
+import os
 from flask import (
     Blueprint, redirect, render_template, request,
     send_file, current_app
@@ -12,13 +13,6 @@ bp = Blueprint('app', __name__, url_prefix='/')
 
 @bp.route('/')
 def home():
-    context = {}
-
-    return render_template('home.html', **context)
-
-
-@bp.route('/test')
-def index():
     allOK = routeServices.checkAllInstalled()
     print( allOK )
     models = routeServices.getModels()
@@ -29,7 +23,8 @@ def index():
         'models' : models,
         'queueDetails' : queueDetails,
     }
-    return render_template('index.html', **context)
+
+    return render_template('home.html', **context)
 
 
 @bp.route('/getQueueDetails')
@@ -43,8 +38,18 @@ def transcribe():
     audioFile = request.files.get('file')
     if audioFile != None:
         inputFile = audioFile.filename
-        id = database.addItem({"title": inputFile, "type": constants.audio_type, "file_name": inputFile, "status": "waiting"})
-        audioFile.save( f"{Paths.waiting}/{id}.wav")
+        #inputFile = "source" + os.path.splitext(audioFile.filename)[1]
+        ext = os.path.splitext(audioFile.filename)[1]
+        if ext in ['.mp3', '.wav', 'ogg', 'aac', 'flac', 'wav', 'aiff', 'm4a', 'wma']:
+            type = constants.audio_type
+        elif ext in ['mp4', 'mov', 'wmv', 'avi', 'mkv', 'webm', 'm4p', 'm4v', 'mpg', 'mpeg', '3gp', '3g2', 'flv', 'f4v', 'f4p', 'f4a', 'f4b']:
+            type = constants.video_type
+        else:
+            return f"Error: Unsupported file - {audioFile}"
+
+        id = database.addItem({"title": inputFile, "type": type, "file_name": inputFile, "status": "waiting"})
+        routeServices.createFolder( id )
+        audioFile.save( f"{Paths.data}/{id}/{inputFile}")
     else:
 
         url = request.form.get('youtubeURL')
@@ -52,7 +57,10 @@ def transcribe():
             info = routeServices.getInfoForYouTubeVideo(url)
             title = info['title']
             ytId = info['id']
-            database.addItem({"title": title, "type": constants.youtube_type, "file_name": ytId, "status": "waiting"})
+            id = database.addItem({"title": title, "type": constants.youtube_type, "file_name": ytId, "status": "waiting"})
+
+            # Create folder for this job
+            routeServices.createFolder( id )
         except Exception as e:
             return f"Error: Could handle find video - {e}"
 
@@ -66,8 +74,10 @@ def showTranscription( id ):
     # Load CSV file
     item = database.getItem(id)
     transcription = routeServices.loadTranscription( item['transcription_file'] )
-    if item['type'] == 'audio':
+    if item['type'] == constants.audio_type:
         page = 'transcription.html'
+    elif item['type'] == constants.video_type:
+        page = 'transcription_vid.html'
     else:
         page = 'transcription_yt.html'
 
@@ -95,11 +105,11 @@ def getItem( id ):
 
 @bp.route('/getFile/<id>', methods=['GET'])
 def getFile( id ):
-     path_to_file = f"../data/done/{id}.wav"
+    item = database.getItem(id)
 
-     return send_file(
-         path_to_file, 
-         mimetype="audio/wav")
+    path_to_file = f"../data/{id}/{item['file_name']}"
+
+    return send_file( path_to_file,  mimetype="audio/wav")
 
 @bp.route('/delete/<file_id>', methods=['GET'])
 def delete(file_id):

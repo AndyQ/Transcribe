@@ -2,6 +2,7 @@ from enum import Enum
 
 # Type of files we handle
 audio_type = "audio"
+video_type = "video"
 youtube_type = "youtube"
 
 # Statuses
@@ -19,6 +20,7 @@ class Status:
 
 # Paths
 class Paths:
+    data = "./data"
     waiting = "./data/waiting"
     inprogress = "./data/inprogress"
     done = "./data/done"

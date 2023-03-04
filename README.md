@@ -1,6 +1,6 @@
 # Transcribe 
 
-Transcribe is a combination of a Vue front end app and a Flask backend server that uses a combination of FFMpeg, yt-dlp (a fork of youtube-dl), and Whisper.cpp (https://github.com/ggerganov/whisper.cpp) to create a transcription of audio (wav,mp3, etc), video(mp4, mkv, etc) and YouTube videos.
+Transcribe is a Flask server app that uses a combination of FFMpeg, yt-dlp (a fork of youtube-dl), and Whisper.cpp (https://github.com/ggerganov/whisper.cpp) to create a transcription of audio (wav,mp3, etc), video(mp4, mkv, etc) and YouTube videos.
 
 The transcription can be viewed and listened to  within a generated webpage, and for YouTube vidoes a side-by-side player is shown. The playback is matched to the transcription (see screenshots).
 
@@ -15,7 +15,6 @@ The transcription can be viewed and listened to  within a generated webpage, and
 ## Requirements
 Note - this has been developed and tested on an M1 Mac.  It should work on other systems but your mileage may vary.
 
-NodeJS - tested on v18.12.1 - other versions may also work
 Python 3.10 - other versions may also work
 ffmpeg (https://ffmpeg.org/download.html) - Required to convert to 16bit mono audio
 whisper.cpp (https://github.com/ggerganov/whisper.cpp)
@@ -50,9 +49,7 @@ There is a setup.sh script provided that will do most of the work but you still 
 
 **Setup automatically (mostly)**
 `./setup.sh`
-This will first setup the Flask backend server, creating the virtual environment, install dependancies, create necessary folders and database, builds and installs whisper, and downloads the whisper model (base).  
-
-Then if successful it will then setup the Vue server - installing dependancies using npm.
+This will setup the Flask server, creating the virtual environment, install dependancies, create necessary folders and database, builds and installs whisper, and downloads the whisper model (base).  
 
 **You still need to manually install ffpeg.**
 
@@ -76,14 +73,10 @@ wget --quiet --show-progress -O 3rdparty/models/ggml-base.bin https://huggingfac
 ```
 **You still need to manually install ffpeg and whisper.**
 
-Install the Vue frontend server
-```cd client
-npm install```
-
 ## Usage
 
 To Start, simply run `run.sh`
-This will first start the Flask server, and if successful will start the Vue frontend server.
+This will start the Flask server
 
 Then access it using `http://localhost:8080`
 
