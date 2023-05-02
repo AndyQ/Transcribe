@@ -37,8 +37,8 @@ def getQueueDetails():
     error = [x for x in items if x['status'] == Status.error]
     
     return {
-        "done": done,
-        "inprogress": inprogress,
+        "completed": done,
+        "processing": inprogress,
         "waiting": waiting,
         "error": error,
     }
@@ -82,6 +82,8 @@ def loadTranscription( file ):
 
     transcription = []
     for i in range( len( contents ) ):
+        if contents[i][0] == 'start':
+            continue
         item = { 'id': i, 'start':  int(contents[i][0]), 'end': int(contents[i][1]), 'text': contents[i][2]}
         transcription.append( item )
     return transcription

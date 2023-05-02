@@ -1,6 +1,5 @@
 import os
 import subprocess
-import uuid
 
 from app import constants
 from app.constants import Paths, Status
@@ -8,6 +7,8 @@ from app import database
 from app import utils
 
 import yt_dlp
+import wave
+import contextlib
 
 
 def handleTask( task ):
@@ -22,7 +23,7 @@ def handleTask( task ):
         convertedFile = convertAudioFile(id, workingFile)
         if convertedFile == None:
             return
-        transcriptionFile = transcribe(id, convertedFile, "transcription")
+        transcriptionFile = transcribe_audio(id, convertedFile, "transcription")
         if transcriptionFile == None:
             return
 
@@ -36,7 +37,7 @@ def handleTask( task ):
         convertedFile = convertYoutubeFile(id, ytName)
         if convertedFile == None:
             return
-        transcriptionFile = transcribe(id, convertedFile, fileName)
+        transcriptionFile = transcribe_audio(id, convertedFile, fileName)
         if transcriptionFile == None:
             return
 
@@ -51,6 +52,11 @@ def handleTask( task ):
 def convertAudioFile(id, sourceFile):
     inputFile = f"{Paths.data}/{id}/{sourceFile}"
     outputFile = f"{Paths.data}/{id}/processed.wav"
+
+    # Only convert if we don't already have a file!
+    if os.path.exists(outputFile):
+        print( "Not re-converting file as conversion already exists")
+        return outputFile
 
     ffmpeg_location = utils.getPath('ffmpeg')
     command = f"'{ffmpeg_location}' -y -i '{inputFile}' -ar 16000 -ac 1 -acodec pcm_s16le '{outputFile}'"
@@ -67,6 +73,11 @@ def convertAudioFile(id, sourceFile):
 def convertYoutubeFile(id, youtubeID):
     inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
     outputFile = f"{Paths.data}/{id}/processed"
+
+    # Only convert if we don't already have a file!
+    if os.path.exists(outputFile+".wav"):
+        print( "Not re-converting file as conversion already exists")
+        return outputFile+".wav"
 
     ffmpeg_location = utils.getPath('ffmpeg')
 
@@ -100,10 +111,28 @@ def convertYoutubeFile(id, youtubeID):
 
     return outputFile+".wav"
 
-def transcribe(id, inputFile, saveAs):
+
+def transcribe_audio(id, inputFile, saveAs):
     outputFile = f"{Paths.data}/{id}/{saveAs}"
 
-    command = f"{Paths.whisper} -f '{inputFile}'  -m {Paths.models}/ggml-base.bin -ocsv -of '{outputFile}'"
+    lengthOfFile = getDuration(inputFile)
+
+    command = [Paths.whisper, '-f', inputFile, '-m', f'{Paths.models}/ggml-base.bin', '-ocsv', '-of', outputFile]
+    try:
+        for line in execute(command):
+            if line.startswith("["):
+                time = line.split(' ')[0].replace('[', '')
+                time = timeToSecs(time)
+                percent = int((time / lengthOfFile) * 100)
+                print( "Transcribing: " + str(percent) + "%" )
+                #database.updateItemStatus( id, f"Transcribing: {percent:.2f}%" )
+    except Exception as e:
+        print(e)
+        return None
+
+    database.updateItemStatus( id, constants.Status.error )
+    return outputFile + ".csv"
+
     rc = subprocess.call(command, shell=True)
     if rc < 0:
         # process was killed by signal
@@ -111,3 +140,31 @@ def transcribe(id, inputFile, saveAs):
     elif rc > 0:
         database.updateItemStatus( id, constants.Status.error )
     return outputFile + ".csv"
+
+def execute(cmd):
+    popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1, universal_newlines=True)
+    for stdout_line in iter(popen.stdout.readline, ""):
+        yield stdout_line 
+    popen.stdout.close()
+    return_code = popen.wait()
+    if return_code:
+        raise subprocess.CalledProcessError(return_code, cmd)
+
+
+def getDuration(inputFile):
+    fname = inputFile
+    with wave.open(fname,'r') as f:
+        frames = f.getnframes()
+        rate = f.getframerate()
+        duration = frames / float(rate)
+        return duration
+
+
+def timeToSecs( time ):
+    # Convert HH:MM:SS.mmm to seconds with ms as fraction
+    h, m, s = time.split(':')
+    secs = int(h) * 3600 + int(m) * 60 + float(s)
+    ms = time.split('.')[1]
+    return secs + (int(ms) / 1000)
+
+

@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Transcribe</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
     <link href="{{url_for('static', filename='fontawesome/css/fontawesome.css')}}" rel="stylesheet">
     <link href="{{url_for('static', filename='fontawesome/css/brands.css')}}" rel="stylesheet">
     <link href="{{url_for('static', filename='fontawesome/css/regular.css')}}" rel="stylesheet">
@@ -42,16 +43,9 @@
     
         .queues {
             position: absolute;
-            bottom: 80px; /* same as footer height */
+            bottom: 0px; /* same as footer height */
             width: 100%; 
-    
-            --column-width : calc(33.33% - (var(--margin) / var(--column-count)));
-            --column-count :3; 
-            --margin : 20px;
-    
-            width: calc(100% - (2 * var(--margin)));
-            margin-left: var(--margin);
-                    
+                        
             display:flex; 
             flex-direction : row; 
             justify-content : space-between; 
@@ -59,7 +53,7 @@
          }
          
          .queue {
-            width: calc(100% - (2 * var(--margin)));
+            width: 100%;
             overflow-y : auto; 
             margin-left: 20px;
             margin-right: 20px;
@@ -184,57 +178,36 @@
             </div>
         </div>
 
-        <div id="title" class="title">
-            <div class="queue">
-                <h1>Waiting</h1>
-            </div>
-            <div class="queue">
-                <h1>Processing</h1>
-            </div>
-            <div class="queue">
-                <h1>Complete</h1>
-            </div>
+        <div id="title2" class="title2 ms-5">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                <span class="nav-link">Waiting</span>
+                </li>
+                <li class="nav-item">
+                    <span class="nav-link">Processing</span>
+                </li>
+                <li class="nav-item">
+                    <span class="nav-link active">Completed</span>
+                </li>
+            </ul>
         </div>
 
-        <div id="queues" class="queues">
-            <div class="queue">
-                <div id="waitingItems" class="items">
-                    {% for item in waiting %}
-                    <span class="item">
-                        
-                        <i @click="deleteItem(item.id)" v-if="type == 'completed'" class="deleteItem fa-solid fa-trash"></i> 
-                        <p class="text">{{item.title}}</p>
-            
-                    </span>
-                    {% endfor %}
-              </div>
-            
-            </div>
-            <div class="queue">
-                <div id="processingItems" class="items">
-                    {% for item in processing %}
-                    <span class="item">
-                        
-                        <i @click="deleteItem(item.id)" v-if="type == 'completed'" class="deleteItem fa-solid fa-trash"></i> 
-                        <p class="text">{{item.title}}</p>
-            
-                    </span>
-                    {% endfor %}
-              </div>
-            </div>
-            <div class="queue">
-                <div id="completedItems" class="items"></div>
+        <div id="queues" class="queues ms-5 mt-2">
+            <div class="queue mt-2 mb-2">
+                <div id="items" class="items"></div>
             </div>
         </div>
     </div>
 
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
 <script>
     $(function () {
     
+        var currentQueue = "completed";
 
         function updateViews() {
-            var titles = $('#title');
+            var titles = $('#title2');
             var queues = $('#queues');
             
             // get header height
@@ -247,6 +220,14 @@
             // set container top margin to header height
             $("#queues").offset({ top: header2Top });
         };
+
+        $(".nav-item").click(function() {
+            $(".nav-link").removeClass("active");
+            $(this).children().addClass("active");
+
+            currentQueue = $(this).children().eq(0).text().toLowerCase();
+            updateQueues();
+        });
 
         $('#selectFile').on("change", function() { 
                 let name = $('#selectFile')[0].files[0]['name']
@@ -314,54 +295,50 @@
     
         function updateQueues( ) {
             $.ajax({
-                url : 'getQueueDetails',
+                url : `getQueueDetails`, ///${currentQueue}`,
                 type : 'GET',
                 success : function(data) {
+                    $("#items").empty();
                     $("#waitingItems").empty();
                     $("#processingItems").empty();
                     $("#completedItems").empty();
-    
-                    for (var i = 0; i < data['waiting'].length; i++) {
-                        let item = data['waiting'][i];
 
-                        let el = `<span class="item"><div>
-                                    <p class="text">${item.title}</p>
-                                </div></span>`;
-                        $("#waitingItems").append(el);
-
+                    var queue = data[currentQueue];
+                    if ( data['waiting'].length > 0 ) {
+                        $("#items").append( "<p class='text-red font-bold text-left'>Waiting:</p>");
                     }
-                    if ( data['error'].length > 0 )
-                        $("#waitingItems").append( "<br><p class='text-red font-bold text-left'>Errors:</p>")
+    
+                    for (var i = 0; i < queue.length; i++) {
+                        let item = queue[i];
+
+                        var el = "";
+                        if (currentQueue !== "completed" ) {
+                            el = `<span class="item"><div>
+                                    <p class="text">${item.title}</p>
+                                    </div></span>`;
+                        } else {
+                            el = `<span class="item"><div>
+                                    <i data-id="${item.id}" class="deleteItem fa-solid fa-trash"></i>
+                                    <a target="_blank" href="/showTranscription/${item.id}"><p class="text">${item.title}</p></a>
+                                </div></span>`;
+                        }
+
+                        $("#items").append(el);
+                    }
+
+                    if ( currentQueue === "waiting" && data['error'].length > 0 ) {
+                        $("#items").append( "<br><p class='text-red font-bold text-left'>Errors:</p>")
 
                         for (var i = 0; i < data['error'].length; i++) {
                             let item = data['error'][i];
+
                             let el = `<span class="item"><div>
                                     <i data-id="${item.id}"  class="deleteItem fa-solid fa-trash"></i> 
                                     <p class="text">${item.title}</p>
-                                </div></span>`;
+                                    </div></span>`;
 
                             $("#waitingItems").append(el);
-
-                            //$("#waitingItems").append(`<p><a href="/delete/${data['error'][i].id}"><i class="fa-solid fa-trash"></i></a> - <span class="text-red text-left">${data['error'][i].title}</span></p>`);
                         }
-                    for (var i = 0; i < data['inprogress'].length; i++) {
-                        let item = data['inprogress'][i];
-
-                        let el = `<span class="item"><div>
-                                    <p class="text">${item.title}</p>
-                                </div></span>`;
-                        $("#processingItems").append(el);
-                    }
-
-                    for (var i = 0; i < data['done'].length; i++) {
-                        let item = data['done'][i];
-
-                        let el = `<span class="item"><div>
-                                    <i data-id="${item.id}" class="deleteItem fa-solid fa-trash"></i> 
-                                    <a target="_blank" href="/showTranscription/${item.id}"><p class="text">${item.title}</p></a>
-                                </div></span>`;
-
-                        $("#completedItems").append(el);
                     }
                 }
             });
