@@ -68,7 +68,7 @@ if [ ! -f "./instance/database.db" ]; then
 fi
 
 # Build whisper
-if [ ! -f "./3rdparty/whisper" ]; then
+if [ ! -f "./whisper.cpp" ]; then
     echo "* Building whisper.cpp...."
     git clone https://github.com/ggerganov/whisper.cpp.git > /dev/null 2>&1 
 else
@@ -87,8 +87,6 @@ then
 fi
 mv main ../3rdparty/whisper
 cd ..
-# Cleanup
-rm -rf ./whisper.cpp
 
 # Download the Whisper base model
 if [ ! -f "./3rdparty/models/ggml-base.bin" ]; then
