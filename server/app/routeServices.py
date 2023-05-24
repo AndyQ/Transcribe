@@ -1,6 +1,7 @@
 import os
 import csv
 import shutil
+import json
 
 from .constants import Status, Paths
 from . import database
@@ -64,11 +65,14 @@ def getInfoForYouTubeVideo(url):
 
     ydl = yt_dlp.YoutubeDL({})
     info = ydl.extract_info(inputFile, download=False)
-    if info.get('entries') is not None:
+    if info != None and info.get('entries', None) is not None:
         if index > 0:
             info = info['entries'][index]
         else:
             raise ValueError("Invalid or missing list index")
+    else:
+        raise ValueError("Invalid or missing list index")
+
     return info
 
 
@@ -76,7 +80,7 @@ def getInfoForYouTubeVideo(url):
 def loadTranscription( file ):
     # Load CSV file
     with open( file, 'r' ) as f:
-        reader = csv.reader(f, quotechar='"', delimiter=',',
+        reader = csv.reader(f, quotechar='"', delimiter=',', escapechar='\\', 
                      quoting=csv.QUOTE_ALL, skipinitialspace=True)
         contents = list(reader)
 
@@ -87,7 +91,48 @@ def loadTranscription( file ):
         item = { 'id': i, 'start':  int(contents[i][0]), 'end': int(contents[i][1]), 'text': contents[i][2]}
         transcription.append( item )
     return transcription
+
+
+def importTranscriptions():
+    # Read items from ./data/import folder
+    path = f'{Paths.data}/import'
+    files = os.listdir(path)
+    files = [file for file in files if file.endswith('.json')]
+    for file in files:
+        print( f"Importing item: {file}" )
+        # Read json file into dict
+        with open( f'{path}/{file}', 'r' ) as f:
+            item = json.loads( f.read() )
+
+            # Create new item in database
+            id = database.addItem(item)
+            createFolder( id )
+            database.updateTranscriptionFile( id, f'{Paths.data}/{id}/transcription.csv' )
+
+            print( f"Created new record with id {id}" )
+
+            # Save transcription file
+            with open( f'{Paths.data}/{id}/transcription.csv', 'w' ) as f:
+                writer = csv.writer(f, quotechar='"', delimiter=',', escapechar='\\', 
+                     doublequote=False, quoting=csv.QUOTE_NONNUMERIC, skipinitialspace=True)
+
+                writer.writerow( ["start", "end", "text"] )
+                for line in item['transcription']:
+                    writer.writerow( [line["start"],line["end"], line["text"]] )
+
+            # Remove file from import folder
+            os.remove( f'{path}/{file}' )
+
+
     
+def exportTranscription( item, path_to_file ):
+    transcription = loadTranscription( item['transcription_file'] )
+    item['transcription'] = transcription
+
+    # write to json file
+    with open( path_to_file, 'w' ) as f:
+        f.write( json.dumps( item ) )
+
 
 def deleteItem( id ):
     path = f'{Paths.data}/{id}'

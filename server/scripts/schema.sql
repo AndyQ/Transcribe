@@ -7,6 +7,7 @@ CREATE TABLE item (
     title TEXT NOT NULL,
     type TEXT NOT NULL,
     file_name TEXT NOT NULL,
+    source_url TEXT,
     transcription_file TEXT,
     status TEXT NOT NULL,
     status_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP

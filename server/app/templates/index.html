@@ -239,7 +239,9 @@
                         $("#inProgressItems").append('<p class="txt-dark font-bold text-left">' + data['inprogress'][i].title + '</p>');
                     }
                     for (var i = 0; i < data['done'].length; i++) {
-                        $("#doneItems").append(`<p><i data-id="${data['done'][i].id}" class="deleteItem txt-dark fa-solid fa-trash"></i> - <a target="_blank" href="/showTranscription/${data['done'][i].id}"><span class="txt-dark font-bold text-left">` + data['done'][i].title + '</span></a></p>');
+                        $("#doneItems").append(`<p><i data-id="${data['done'][i].id}" class="deleteItem txt-dark fa-solid fa-trash"></i>
+                            <i data-id="${data['done'][i].id}" class="exportItem txt-dark fa-solid fa-file-export"></i>
+                             - <a target="_blank" href="/showTranscription/${data['done'][i].id}"><span class="txt-dark font-bold text-left">` + data['done'][i].title + '</span></a></p>');
                     }
                 }
             });

@@ -16,8 +16,10 @@ def addItem( task ):
 
     print( task )
 
-    cursor.execute('INSERT INTO item (title, type, file_name, status) VALUES (?, ?, ?, ?)',
-                 (task['title'], task['type'], task['file_name'], 'waiting'))
+    source_url = task.get('source_url', None)
+    status = task.get('status', 'waiting')
+    cursor.execute('INSERT INTO item (title, type, file_name, source_url, status) VALUES (?, ?, ?, ?, ?)',
+                 (task['title'], task['type'], task['file_name'], source_url, status))
     rowid = cursor.lastrowid
     conn.commit()
 

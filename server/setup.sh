@@ -54,9 +54,7 @@ else
 fi
 
 # Create data folders 
-if [ ! -d "./data" ]; then
-    mkdir ./data ./data/waiting ./data/inprogress ./data/done instance
-fi
+mkdir -p ./data ./data/waiting ./data/inprogress ./data/done ./data/export ./data/import  instance
 
 # Create folder for 3rd party files
 if [ ! -d "./3rdparty" ]; then
@@ -73,20 +71,25 @@ fi
 if [ ! -f "./3rdparty/whisper" ]; then
     echo "* Building whisper.cpp...."
     git clone https://github.com/ggerganov/whisper.cpp.git > /dev/null 2>&1 
-    cd ./whisper.cpp || exit
-    if ! make > /dev/null 2>&1 
-    then
-        printf "Failed to build whisper.cpp\n"
-        printf "Please try again later or build it yourself.\n"
-        exit 1
-    fi
-    mv main ../3rdparty/whisper
-    cd ..
-    # Cleanup
-    rm -rf ./whisper.cpp
 else
-    echo "* Whisper is already built"
+    cd ./whisper.cpp || exit
+    git pull
+    cd ..
 fi
+
+# Build whisper
+cd ./whisper.cpp || exit
+if ! make > /dev/null 2>&1 
+then
+    printf "Failed to build whisper.cpp\n"
+    printf "Please try again later or build it yourself.\n"
+    exit 1
+fi
+mv main ../3rdparty/whisper
+cd ..
+# Cleanup
+rm -rf ./whisper.cpp
+
 # Download the Whisper base model
 if [ ! -f "./3rdparty/models/ggml-base.bin" ]; then
     echo "Downloading whisper base model"

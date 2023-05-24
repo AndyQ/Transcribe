@@ -15,8 +15,7 @@
     .ViewTranscription {
         display: flex;
         flex-direction: column;
-        max-height: 100vh;       /* body takes whole viewport's height */
-
+        max-height: 95vh;       /* body takes whole viewport's height */
     }
 
     .transcription {
@@ -37,6 +36,7 @@
         padding-bottom: 56.25%;
         margin-left: 10px;
         margin-right: 10px;
+        max-height: 100%;
     }
 
     .video-container iframe {
@@ -52,6 +52,7 @@
             <div class="header text-center">
                 <div class="col">
                     <h1 class="txt-dark">{{title}}</h1>
+                    <a href="{{source_url}}" target="_blank">{{source_url}}</a>
                 </div>
             </div>
             <div style="height:20px;"></div>

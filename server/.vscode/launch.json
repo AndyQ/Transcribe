@@ -5,12 +5,19 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Module",
+            "type": "python",
+            "request": "launch",
+            "module": "scripts.fix_db",
+            "justMyCode": true
+        },
+        {
             "name": "Run App",
             "type": "python",
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
-            "cwd":"${workspaceFolder}",
+            "cwd": "${workspaceFolder}",
             "jinja": true,
             "justMyCode": true,
             "env": {

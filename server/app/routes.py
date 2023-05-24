@@ -57,7 +57,7 @@ def transcribe():
             info = routeServices.getInfoForYouTubeVideo(url)
             title = info['title']
             ytId = info['id']
-            id = database.addItem({"title": title, "type": constants.youtube_type, "file_name": ytId, "status": "waiting"})
+            id = database.addItem({"title": title, "type": constants.youtube_type, "file_name": ytId, "url": url, "status": "waiting"})
 
             # Create folder for this job
             routeServices.createFolder( id )
@@ -84,6 +84,7 @@ def showTranscription( id ):
     context = {
         "title" : item['title'],
         "file" : item['file_name'],
+        "source_url" : item['source_url'],
         "id" : item['id'],
         "transcription" : transcription,
     }
@@ -115,6 +116,17 @@ def getFile( id ):
 def delete(file_id):
     routeServices.deleteItem( file_id )
     return redirect( '/' )
+
+@bp.route('/exportItem', methods=['POST'])
+def export():
+    id = request.form.get('id', None)
+    if id != None:
+        item = database.getItem(id)
+        path_to_file = f"./data/export/{id}.json"
+        routeServices.exportTranscription( item, path_to_file )
+        return {"status": "ok"}
+    else:
+        return {"status": "error"}
 
 @bp.route('/deleteItem', methods=['POST'])
 def deleteItem():

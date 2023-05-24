@@ -3,10 +3,14 @@ import atexit
 import os
 
 from app import create_app
+from app import routeServices
 from app.worker import watchdog
 app = create_app()
 
 if __name__ == "__main__":
+    # Check to see if we have any files to import
+    routeServices.importTranscriptions()
+
     # start out watchdog thread on startup
     if os.environ.get("WERKZEUG_RUN_MAIN") != "true":
         watchdog.start_watchdog()
