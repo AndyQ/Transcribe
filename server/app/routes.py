@@ -38,8 +38,9 @@ def transcribe():
     audioFile = request.files.get('file')
     if audioFile != None:
         inputFile = audioFile.filename
-        #inputFile = "source" + os.path.splitext(audioFile.filename)[1]
-        ext = os.path.splitext(audioFile.filename)[1]
+        if inputFile == None:
+            return "Error: No file uploaded"
+        ext = os.path.splitext(inputFile)[1]
         if ext in ['.mp3', '.wav', 'ogg', 'aac', 'flac', 'wav', 'aiff', 'm4a', 'wma']:
             type = constants.audio_type
         elif ext in ['mp4', 'mov', 'wmv', 'avi', 'mkv', 'webm', 'm4p', 'm4v', 'mpg', 'mpeg', '3gp', '3g2', 'flv', 'f4v', 'f4p', 'f4a', 'f4b']:
@@ -62,6 +63,7 @@ def transcribe():
             # Create folder for this job
             routeServices.createFolder( id )
         except Exception as e:
+            print( f"Error: Could handle find video - {e}" )
             return f"Error: Could handle find video - {e}"
 
     return "Added to queue"

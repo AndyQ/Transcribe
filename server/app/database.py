@@ -28,8 +28,11 @@ def addItem( task ):
     row = cursor.fetchone()
     conn.close()
 
-    (inserted_id,) = row if row else None
-    return inserted_id
+    if row:
+        (inserted_id,) = row
+        return inserted_id
+    else:
+        return None
 
 def getItems():
     conn = get_db_connection()

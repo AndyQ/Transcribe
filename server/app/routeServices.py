@@ -65,13 +65,14 @@ def getInfoForYouTubeVideo(url):
 
     ydl = yt_dlp.YoutubeDL({})
     info = ydl.extract_info(inputFile, download=False)
-    if info != None and info.get('entries', None) is not None:
-        if index > 0:
-            info = info['entries'][index]
-        else:
-            raise ValueError("Invalid or missing list index")
+    if info != None:
+        if info.get('entries', None) is not None:
+            if index > 0:
+                info = info['entries'][index]
+            else:
+                info = info['entries'][0]
     else:
-        raise ValueError("Invalid or missing list index")
+        raise ValueError("Info is none")
 
     return info
 
