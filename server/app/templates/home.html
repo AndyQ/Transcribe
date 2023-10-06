@@ -261,12 +261,12 @@
                 contentType: false,  // tell jQuery not to set contentType
                 success : function(data) {
                     console.log(data);
-                    // const toastLiveExample = document.getElementById('liveToast')
-                    // const toastElement = $('#liveToast');
-                    //     const text = $('#toastBody');
-                    //     text.text("Added item to queue" );
-                    // const toast = new bootstrap.Toast(toastElement)
-                    // toast.show()
+                    const toastLiveExample = document.getElementById('liveToast')
+                    const toastElement = $('#liveToast');
+                        const text = $('#toastBody');
+                        text.text("Added item to queue" );
+                    const toast = new bootstrap.Toast(toastElement)
+                    toast.show()
                 }
             });
         });

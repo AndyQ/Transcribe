@@ -31,18 +31,23 @@ def handleTask( task ):
         #os.remove(convertedFile)
 
     elif type == constants.youtube_type:
+        url = f"{task['source_url']}"
         ytName = f"{task['file_name']}"
         fileName = f"transcription"
 
-        convertedFile = convertYoutubeFile(id, ytName)
+        convertedFile = convertYoutubeFile(id, ytName, url)
         if convertedFile == None:
             return
         transcriptionFile = transcribe_audio(id, convertedFile, fileName)
         if transcriptionFile == None:
             return
 
-        # remove converted file
-        os.remove(convertedFile)
+        if url.find('youtube.com=') != -1:
+            # remove converted file
+            os.remove(convertedFile)
+        else:
+            database.updateItemType(task['id'], constants.audio_type)
+            database.updateItemFilename(task['id'], "processed.wav")
 
         database.updateItemStatus(task['id'], "complete")
 
@@ -70,8 +75,8 @@ def convertAudioFile(id, sourceFile):
 
     return outputFile
 
-def convertYoutubeFile(id, youtubeID):
-    inputFile = f"https://www.youtube.com/watch?v={youtubeID}"
+def convertYoutubeFile(id, youtubeID, url):
+    inputFile = url #f"https://www.youtube.com/watch?v={youtubeID}"
     outputFile = f"{Paths.data}/{id}/processed"
 
     # Only convert if we don't already have a file!
@@ -118,6 +123,7 @@ def transcribe_audio(id, inputFile, saveAs):
     lengthOfFile = getDuration(inputFile)
 
     command = [Paths.whisper, '-f', inputFile, '-m', f'{Paths.models}/ggml-base.bin', '-ocsv', '-of', outputFile]
+    # command = [Paths.whisper, '-f', inputFile, '-m', f'{Paths.models}/ggml-small.en-tdrz.bin', '-tdrz', '-ocsv', '-of', outputFile]
     try:
         for line in execute(command):
             if line.startswith("["):
@@ -125,7 +131,7 @@ def transcribe_audio(id, inputFile, saveAs):
                 time = timeToSecs(time)
                 percent = int((time / lengthOfFile) * 100)
                 print( "Transcribing: " + str(percent) + "%" )
-                #database.updateItemStatus( id, f"Transcribing: {percent:.2f}%" )
+                database.updateItemStatus( id, f"Transcribing: {percent:.2f}%" )
     except Exception as e:
         print(e)
         return None

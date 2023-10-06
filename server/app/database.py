@@ -16,7 +16,7 @@ def addItem( task ):
 
     print( task )
 
-    source_url = task.get('source_url', None)
+    source_url = task.get('source_url', task.get('url'))
     status = task.get('status', 'waiting')
     cursor.execute('INSERT INTO item (title, type, file_name, source_url, status) VALUES (?, ?, ?, ?, ?)',
                  (task['title'], task['type'], task['file_name'], source_url, status))
@@ -83,6 +83,20 @@ def getFirstWaitingItem():
     #     return None
 
     return row
+
+def updateItemType( id, type ):
+    conn = get_db_connection()
+    conn.execute('UPDATE item SET type = ? WHERE id = ?',
+                 (type, id))
+    conn.commit()
+    conn.close()
+
+def updateItemFilename( id, filename ):
+    conn = get_db_connection()
+    conn.execute('UPDATE item SET file_name pe = ? WHERE id = ?',
+                 (filename, id))
+    conn.commit()
+    conn.close()
 
 def updateItemStatus( id, status ):
     conn = get_db_connection()
