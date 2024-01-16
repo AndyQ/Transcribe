@@ -76,7 +76,9 @@ def showTranscription( id ):
     # Load CSV file
     item = database.getItem(id)
     transcription = routeServices.loadTranscription( item['transcription_file'] )
-    if item['type'] == constants.audio_type:
+    if request.args.get('transcription_only'):
+        page = 'transcription_only.html'
+    elif item['type'] == constants.audio_type:
         page = 'transcription.html'
     elif item['type'] == constants.video_type:
         page = 'transcription_vid.html'

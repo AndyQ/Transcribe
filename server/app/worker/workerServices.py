@@ -42,7 +42,7 @@ def handleTask( task ):
         if transcriptionFile == None:
             return
 
-        if url.find('youtube.com=') != -1:
+        if url.find('youtube.com') != -1:
             # remove converted file
             os.remove(convertedFile)
         else:
@@ -122,7 +122,7 @@ def transcribe_audio(id, inputFile, saveAs):
 
     lengthOfFile = getDuration(inputFile)
 
-    command = [Paths.whisper, '-f', inputFile, '-m', f'{Paths.models}/ggml-base.bin', '-ocsv', '-of', outputFile]
+    command = [Paths.whisper, '-f', inputFile, '-m', f'{Paths.models}/ggml-base.en.bin', '-ocsv', '-of', outputFile]
     # command = [Paths.whisper, '-f', inputFile, '-m', f'{Paths.models}/ggml-small.en-tdrz.bin', '-tdrz', '-ocsv', '-of', outputFile]
     try:
         for line in execute(command):
@@ -133,10 +133,11 @@ def transcribe_audio(id, inputFile, saveAs):
                 print( "Transcribing: " + str(percent) + "%" )
                 database.updateItemStatus( id, f"Transcribing: {percent:.2f}%" )
     except Exception as e:
+        database.updateItemStatus( id, constants.Status.error )
         print(e)
         return None
 
-    database.updateItemStatus( id, constants.Status.error )
+    database.updateItemStatus( id, constants.Status.complete )
     return outputFile + ".csv"
 
     rc = subprocess.call(command, shell=True)

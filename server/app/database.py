@@ -93,7 +93,7 @@ def updateItemType( id, type ):
 
 def updateItemFilename( id, filename ):
     conn = get_db_connection()
-    conn.execute('UPDATE item SET file_name pe = ? WHERE id = ?',
+    conn.execute('UPDATE item SET file_name = ? WHERE id = ?',
                  (filename, id))
     conn.commit()
     conn.close()
