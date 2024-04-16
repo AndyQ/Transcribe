@@ -104,15 +104,20 @@ def convertYoutubeFile(id, youtubeID, url):
         'outtmpl': outputFile,
     }
 
+    print( "*** Downloading youtube file ***")
     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
         try:
             error_code = ydl.download(URLS)
             if error_code != 0:
+                print( f"error downloaded youtube file: {error_code}")
                 database.updateItemStatus( id, constants.Status.error )
                 return None
         except Exception as e:
+            print( "Error downloading youtube file: ", e)
             database.updateItemStatus( id, constants.Status.error )
             return None
+        
+        print( "Youtube file downloaded")
 
     return outputFile+".wav"
 
@@ -122,8 +127,10 @@ def transcribe_audio(id, inputFile, saveAs):
 
     lengthOfFile = getDuration(inputFile)
 
+    print( "Transcribing file: " + inputFile)
     command = [Paths.whisper, '-f', inputFile, '-m', f'{Paths.models}/ggml-base.en.bin', '-ocsv', '-of', outputFile]
     # command = [Paths.whisper, '-f', inputFile, '-m', f'{Paths.models}/ggml-small.en-tdrz.bin', '-tdrz', '-ocsv', '-of', outputFile]
+    print( f"running {command}" )
     try:
         for line in execute(command):
             if line.startswith("["):

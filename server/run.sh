@@ -5,4 +5,4 @@ if [ ! -f "./instance/database.db" ]; then
 
 fi
 
-python main.py
+python -u main.py

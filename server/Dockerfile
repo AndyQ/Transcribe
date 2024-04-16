@@ -1,30 +1,37 @@
 # Build whisper
-FROM python:3.10-slim-bullseye as builder
-RUN apt-get clean && apt-get update &&\
-    apt-get -qy install git g++ make
+FROM python:3.11-slim-bookworm as builder
+RUN apt-get clean && apt-get update && \
+    apt-get -qy install git g++ make wget
 
-COPY --from=mwader/static-ffmpeg:5.1.2-arm64 /ffmpeg /ffmpeg    
+WORKDIR /app
 
-RUN git clone https://github.com/ggerganov/whisper.cpp.git &&\
-    cd whisper.cpp && make
+COPY --from=mwader/static-ffmpeg:6.1.1 /ffmpeg /ffmpeg   
+
+RUN ls -la /
 
 
-FROM python:3.10-slim-bullseye
+RUN git clone https://github.com/ggerganov/whisper.cpp.git /whisper.cpp &&\
+    cd /whisper.cpp && uname -m && make main
+
+
+FROM python:3.11-slim-bookworm
 
 RUN apt-get clean && apt-get update &&\
     apt-get -qy install wget
 
-WORKDIR /app
 
 RUN bash -c 'mkdir -pv data/{waiting,inprogress,done} instance 3rdparty/models' &&\
     pip3 install --upgrade pip &&\
-    wget  --quiet --show-progress -O 3rdparty/models/ggml-base.bin https://huggingface.co/datasets/ggerganov/whisper.cpp/resolve/main/ggml-base.bin
+    wget  --quiet --show-progress -O 3rdparty/models/ggml-base.en.bin https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-base.en.bin?download=true
 
 COPY --from=builder /whisper.cpp/main ./3rdparty/whisper
 
+# RUN cp /whisper.cpp/main ./3rdparty/whisper && cp /ffmpeg ./3rdparty/ffmpeg
+
+
 COPY --from=builder /ffmpeg ./3rdparty/ffmpeg
 
-COPY . ./
+COPY . ./ 
 RUN pip3 install -r requirements.txt
 RUN python3 -m scripts.init-db
 

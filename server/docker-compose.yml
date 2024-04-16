@@ -2,10 +2,9 @@ version: '3.7'
 
 services:
   web:
-    container_name: web
-    build:
-      context: .
-      dockerfile: Dockerfile
+    platform: linux/amd64
+    build: .
+    image: transcribe    
     ports:
       - "8080:8080"
     volumes:
