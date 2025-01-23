@@ -91,7 +91,7 @@ cd ..
 # Download the Whisper base model
 if [ ! -f "./3rdparty/models/ggml-base.bin" ]; then
     echo "Downloading whisper base model"
-    src="https://huggingface.co/datasets/ggerganov/whisper.cpp"
+    src="https://huggingface.co/ggerganov/whisper.cpp"
     pfx="resolve/main/ggml"
     model="base"
     if [ -x "$(command -v wget)" ]; then
