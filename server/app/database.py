@@ -3,28 +3,31 @@ import datetime
 
 from .constants import Paths
 
+
 def get_db_connection():
-    conn = sqlite3.connect(f'{Paths.instance}/database.db')
+    conn = sqlite3.connect(f"{Paths.instance}/database.db")
     conn.row_factory = sqlite3.Row
     return conn
 
 
-def addItem( task ):
+def addItem(task):
     conn = get_db_connection()
 
-    cursor=conn.cursor()
+    cursor = conn.cursor()
 
-    print( task )
+    print(task)
 
-    source_url = task.get('source_url', task.get('url'))
-    status = task.get('status', 'waiting')
-    cursor.execute('INSERT INTO item (title, type, file_name, source_url, status) VALUES (?, ?, ?, ?, ?)',
-                 (task['title'], task['type'], task['file_name'], source_url, status))
+    source_url = task.get("source_url", task.get("url"))
+    status = task.get("status", "waiting")
+    cursor.execute(
+        "INSERT INTO item (title, type, file_name, source_url, status) VALUES (?, ?, ?, ?, ?)",
+        (task["title"], task["type"], task["file_name"], source_url, status),
+    )
     rowid = cursor.lastrowid
     conn.commit()
 
     # Get id from last insert
-    cursor.execute('SELECT id FROM item WHERE rowid = ?', (rowid,))
+    cursor.execute("SELECT id FROM item WHERE rowid = ?", (rowid,))
     row = cursor.fetchone()
     conn.close()
 
@@ -34,40 +37,43 @@ def addItem( task ):
     else:
         return None
 
+
 def getItems():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT * FROM item order by status_updated desc')
+    cur.execute("SELECT * FROM item order by status_updated desc")
     rows = [dict(row) for row in cur.fetchall()]
     conn.close()
 
-
     return rows
 
-def getItem( id ):
+
+def getItem(id):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT * FROM item WHERE id = ?', (id,))
+    cur.execute("SELECT * FROM item WHERE id = ?", (id,))
     row = cur.fetchone()
     conn.close()
 
     return dict(row)
 
-def deleteItem( id ):
+
+def deleteItem(id):
     conn = get_db_connection()
-    conn.execute('DELETE FROM item WHERE id = ?', (id,))
+    conn.execute("DELETE FROM item WHERE id = ?", (id,))
     conn.commit()
     conn.close()
 
 
-def getItemsWithStatus( status ):
+def getItemsWithStatus(status):
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute('SELECT * FROM item WHERE status = ?', (status,))
+    cur.execute("SELECT * FROM item WHERE status = ?", (status,))
     rows = [dict(row) for row in cur.fetchall()]
     conn.close()
 
     return rows
+
 
 def getFirstWaitingItem():
     conn = get_db_connection()
@@ -76,39 +82,37 @@ def getFirstWaitingItem():
     row = cur.fetchone()
     conn.close()
 
-    # # If no jobs, see if any pending
-    # if row == None:
-    #     cur.execute('SELECT * FROM item WHERE status = "waiting" LIMIT 1')
-
-    #     return None
-
     return row
 
-def updateItemType( id, type ):
+
+def updateItemType(id, type):
     conn = get_db_connection()
-    conn.execute('UPDATE item SET type = ? WHERE id = ?',
-                 (type, id))
+    conn.execute("UPDATE item SET type = ? WHERE id = ?", (type, id))
     conn.commit()
     conn.close()
 
-def updateItemFilename( id, filename ):
+
+def updateItemFilename(id, filename):
     conn = get_db_connection()
-    conn.execute('UPDATE item SET file_name = ? WHERE id = ?',
-                 (filename, id))
+    conn.execute("UPDATE item SET file_name = ? WHERE id = ?", (filename, id))
     conn.commit()
     conn.close()
 
-def updateItemStatus( id, status ):
+
+def updateItemStatus(id, status, error_message=None):
     conn = get_db_connection()
-    conn.execute('UPDATE item SET status = ?, status_updated = ? WHERE id = ?',
-                 (status, datetime.datetime.now(), id))
+    conn.execute(
+        "UPDATE item SET status = ?, status_updated = ?, error_reason = ? WHERE id = ?",
+        (status, datetime.datetime.now(), error_message, id),
+    )
     conn.commit()
     conn.close()
 
-def updateTranscriptionFile( id, transcriptionFile ):
+
+def updateTranscriptionFile(id, transcriptionFile):
     conn = get_db_connection()
-    conn.execute('UPDATE item SET transcription_file = ? WHERE id = ?',
-                 (transcriptionFile, id))
+    conn.execute(
+        "UPDATE item SET transcription_file = ? WHERE id = ?", (transcriptionFile, id)
+    )
     conn.commit()
     conn.close()
-

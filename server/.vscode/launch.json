@@ -6,14 +6,14 @@
     "configurations": [
         {
             "name": "Python: Module",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "module": "scripts.fix_db",
             "justMyCode": true
         },
         {
             "name": "Run App",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
@@ -21,6 +21,7 @@
             "jinja": true,
             "justMyCode": true,
             "env": {
+                "DEBUG": "1",
                 "FLASK_DEBUG": "1",
                 "FLASK_RUN_PORT": "8081",
                 "FLASK_RUN_HOST": "0.0.0.0"

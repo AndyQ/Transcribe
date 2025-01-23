@@ -1,144 +1,147 @@
 import os
-from flask import (
-    Blueprint, redirect, render_template, request,
-    send_file, current_app
-)
+from flask import Blueprint, redirect, render_template, request, send_file, flash, current_app
 
 from . import routeServices
 from . import database
 from . import constants
 from .constants import Paths
 
-bp = Blueprint('app', __name__, url_prefix='/')
+bp = Blueprint("app", __name__, url_prefix="/")
 
-@bp.route('/')
+
+@bp.route("/")
 def home():
     allOK = routeServices.checkAllInstalled()
-    print( allOK )
+    print(allOK)
     models = routeServices.getModels()
     queueDetails = routeServices.getQueueDetails()
 
     context = {
-        'title': 'Whisper',
-        'models' : models,
-        'queueDetails' : queueDetails,
+        "title": "Whisper",
+        "models": models,
+        "queueDetails": queueDetails,
     }
 
-    return render_template('home.html', **context)
+    return render_template("home.html", **context)
 
 
-@bp.route('/getQueueDetails')
+@bp.route("/getQueueDetails")
 def getQueueDetails():
     queueDetails = routeServices.getQueueDetails()
     return queueDetails
 
-@bp.route('/addItem', methods=['POST'])
+
+@bp.route("/addItem", methods=["POST"])
 def transcribe():
 
-    audioFile = request.files.get('file')
+    audioFile = request.files.get("file")
+    youTubeURL = request.form.get('youtubeURL')
+    youTubeURLList = request.form.get('youTubeURLList')
+
+    rc = "Nothing done"
     if audioFile != None:
-        inputFile = audioFile.filename
-        if inputFile == None:
-            return "Error: No file uploaded"
-        ext = os.path.splitext(inputFile)[1]
-        if ext in ['.mp3', '.wav', 'ogg', 'aac', 'flac', 'wav', 'aiff', 'm4a', 'wma']:
-            type = constants.audio_type
-        elif ext in ['mp4', 'mov', 'wmv', 'avi', 'mkv', 'webm', 'm4p', 'm4v', 'mpg', 'mpeg', '3gp', '3g2', 'flv', 'f4v', 'f4p', 'f4a', 'f4b']:
-            type = constants.video_type
+       rc = routeServices.addAudioFileItem( audioFile )
+
+    elif youTubeURL != None and youTubeURL != "":
+
+        url = request.form.get("youtubeURL")
+        if url.find("youtu.be") == -1 and url.find("youtube.com") == -1:
+            rc = "Error: Invalid YouTube URL"
         else:
-            return f"Error: Unsupported file - {audioFile}"
+            routeServices.addYouTubeURLItem( url )
+    elif youTubeURLList != None and youTubeURLList != "":
+        # split the text into lines
+        youTubeURLList = youTubeURLList.replace("\r", "")
+        lines = youTubeURLList.split("\n")
 
-        id = database.addItem({"title": inputFile, "type": type, "file_name": inputFile, "status": "waiting"})
-        routeServices.createFolder( id )
-        audioFile.save( f"{Paths.data}/{id}/{inputFile}")
-    else:
+        for line in lines:
+            line = line.strip()
+            if line == "":
+                continue
 
-        url = request.form.get('youtubeURL')
-        try:
-            info = routeServices.getInfoForYouTubeVideo(url)
-            title = info['title']
-            ytId = info['id']
-            id = database.addItem({"title": title, "type": constants.youtube_type, "file_name": ytId, "url": url, "status": "waiting"})
+            url = line
+            if url.find("youtu.be") == -1 and url.find("youtube.com") == -1:
+                flash( f"Error: Invalid YouTube URL - {url}" )
+                rc = f"Error: Invalid YouTube URL - {url}"
+            else:
+                routeServices.addYouTubeURLItem( url )
 
-            # Create folder for this job
-            routeServices.createFolder( id )
-        except Exception as e:
-            print( f"Error: Could handle find video - {e}" )
-            return f"Error: Could handle find video - {e}"
-
-    return "Added to queue"
+    return rc
 
 
-@bp.route('/showTranscription/<id>', methods=['GET'])
-def showTranscription( id ):
-    print( "ID: " + id )
+@bp.route("/showTranscription/<id>", methods=["GET"])
+def showTranscription(id):
+    print("ID: " + id)
 
     # Load CSV file
     item = database.getItem(id)
-    transcription = routeServices.loadTranscription( item['transcription_file'] )
-    if request.args.get('transcription_only'):
-        page = 'transcription_only.html'
-    elif item['type'] == constants.audio_type:
-        page = 'transcription.html'
-    elif item['type'] == constants.video_type:
-        page = 'transcription_vid.html'
+    transcription = routeServices.loadTranscription(item["transcription_file"])
+    if request.args.get("transcription_only"):
+        page = "transcription_only.html"
+    elif item["type"] == constants.audio_type:
+        page = "transcription.html"
+    elif item["type"] == constants.video_type:
+        page = "transcription_vid.html"
     else:
-        page = 'transcription_yt.html'
+        page = "transcription_yt.html"
 
     context = {
-        "title" : item['title'],
-        "file" : item['file_name'],
-        "source_url" : item['source_url'],
-        "id" : item['id'],
-        "transcription" : transcription,
+        "title": item["title"],
+        "file": item["file_name"],
+        "source_url": item["source_url"],
+        "id": item["id"],
+        "transcription": transcription,
     }
     return render_template(page, **context)
 
-@bp.route('/getItem/<id>', methods=['GET'])
-def getItem( id ):
+
+@bp.route("/getItem/<id>", methods=["GET"])
+def getItem(id):
     item = database.getItem(id)
-    transcription = routeServices.loadTranscription( item['transcription_file'] )
+    transcription = routeServices.loadTranscription(item["transcription_file"])
     context = {
-        "title" : item['title'],
-        "file" : item['file_name'],
-        "id" : item['id'],
-        "transcription" : transcription,
+        "title": item["title"],
+        "file": item["file_name"],
+        "id": item["id"],
+        "transcription": transcription,
     }
 
     return context
 
 
-@bp.route('/getFile/<id>', methods=['GET'])
-def getFile( id ):
+@bp.route("/getFile/<id>", methods=["GET"])
+def getFile(id):
     item = database.getItem(id)
 
     path_to_file = f"../data/{id}/{item['file_name']}"
 
-    return send_file( path_to_file,  mimetype="audio/wav")
+    return send_file(path_to_file, mimetype="audio/wav")
 
-@bp.route('/delete/<file_id>', methods=['GET'])
+
+@bp.route("/delete/<file_id>", methods=["GET"])
 def delete(file_id):
-    routeServices.deleteItem( file_id )
-    return redirect( '/' )
+    routeServices.deleteItem(file_id)
+    return redirect("/")
 
-@bp.route('/exportItem', methods=['POST'])
+
+@bp.route("/exportItem", methods=["POST"])
 def export():
-    id = request.form.get('id', None)
+    id = request.form.get("id", None)
     if id != None:
         item = database.getItem(id)
         path_to_file = f"./data/export/{id}.json"
-        routeServices.exportTranscription( item, path_to_file )
+        routeServices.exportTranscription(item, path_to_file)
         return {"status": "ok"}
     else:
         return {"status": "error"}
 
-@bp.route('/deleteItem', methods=['POST'])
+
+@bp.route("/deleteItem", methods=["POST"])
 def deleteItem():
-    file_id = request.form.get('id', None)
+    file_id = request.form.get("id", None)
     if file_id != None:
-        routeServices.deleteItem( file_id )
+        routeServices.deleteItem(file_id)
 
         return {"status": "ok"}
     else:
         return {"status": "error"}
-

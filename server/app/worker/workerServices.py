@@ -42,7 +42,7 @@ def handleTask( task ):
         if transcriptionFile == None:
             return
 
-        if url.find('youtube.com') != -1:
+        if url.find('youtube.com') != -1 or url.find('youtu.be') != -1:
             # remove converted file
             os.remove(convertedFile)
         else:
@@ -70,7 +70,7 @@ def convertAudioFile(id, sourceFile):
         # process was killed by signal
         return None
     elif rc > 0:
-        database.updateItemStatus( id, constants.Status.error )
+        database.updateItemStatus( id, constants.Status.error, f"Error converting audio ({command})" )
         return None
 
     return outputFile
@@ -89,6 +89,7 @@ def convertYoutubeFile(id, youtubeID, url):
     URLS = [inputFile]
 
     ydl_opts = {
+        'noplaylist':True,
         'format': 'bestaudio/best',
         '--ffmpeg-location': ffmpeg_location,
         'quiet': True,
@@ -110,11 +111,11 @@ def convertYoutubeFile(id, youtubeID, url):
             error_code = ydl.download(URLS)
             if error_code != 0:
                 print( f"error downloaded youtube file: {error_code}")
-                database.updateItemStatus( id, constants.Status.error )
+                database.updateItemStatus( id, constants.Status.error, f"Error downloading youtube video({inputFile} - rc: {error_code})" )    
                 return None
         except Exception as e:
             print( "Error downloading youtube file: ", e)
-            database.updateItemStatus( id, constants.Status.error )
+            database.updateItemStatus( id, constants.Status.error, f"Error downloading youtube video({inputFile} - {e})" )
             return None
         
         print( "Youtube file downloaded")
@@ -140,20 +141,13 @@ def transcribe_audio(id, inputFile, saveAs):
                 print( "Transcribing: " + str(percent) + "%" )
                 database.updateItemStatus( id, f"Transcribing: {percent:.2f}%" )
     except Exception as e:
-        database.updateItemStatus( id, constants.Status.error )
+        database.updateItemStatus( id, constants.Status.error, f"Error transcribing audio ({command})" )
         print(e)
         return None
 
     database.updateItemStatus( id, constants.Status.complete )
     return outputFile + ".csv"
 
-    rc = subprocess.call(command, shell=True)
-    if rc < 0:
-        # process was killed by signal
-        return None
-    elif rc > 0:
-        database.updateItemStatus( id, constants.Status.error )
-    return outputFile + ".csv"
 
 def execute(cmd):
     popen = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, bufsize=1, universal_newlines=True)

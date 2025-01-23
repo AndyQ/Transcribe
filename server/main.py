@@ -5,6 +5,7 @@ import os
 from app import create_app
 from app import routeServices
 from app.worker import watchdog
+
 app = create_app()
 
 if __name__ == "__main__":

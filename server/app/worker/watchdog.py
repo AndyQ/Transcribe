@@ -13,6 +13,8 @@ from . import workerServices
 
 should_run = False
 watchdog_thread_id = None
+
+
 def start_watchdog():
     global should_run, watchdog_thread_id
 
@@ -25,7 +27,7 @@ def start_watchdog():
     jobs = get_jobs_from_database()
     for job in jobs:
         workerQueue.put(job)
-        database.updateItemStatus(job['id'], "pending")
+        database.updateItemStatus(job["id"], "pending")
 
     # Create a lock object to synchronize the access to the queue and the threads list
     lock = threading.Lock()
@@ -33,7 +35,12 @@ def start_watchdog():
     should_run = True
 
     # Create and start the watchdog thread and pass the queue, the threads, the lock and the timeout as arguments
-    watchdog_thread = threading.Thread(target=watchdog, name="Watchdog", daemon=True, args=(workerQueue, threads, lock, 5))
+    watchdog_thread = threading.Thread(
+        target=watchdog,
+        name="Watchdog",
+        daemon=True,
+        args=(workerQueue, threads, lock, 5),
+    )
     watchdog_thread.daemon = True
     watchdog_thread.start()
 
@@ -41,16 +48,17 @@ def start_watchdog():
 
     # watchdog_thread.join()
 
-    print( "Watchdog started" )
+    print("Watchdog started")
+
 
 def stop_watchdog():
     global should_run
-    print( "Watchdog shutting down" )
+    print("Watchdog shutting down")
     should_run = False
 
     # kill off any subprocess that are currently running
     active = multiprocessing.active_children()
-    print( active )
+    print(active)
 
 
 def is_watchdog_running():
@@ -85,7 +93,7 @@ def watchdog(queue, threads, lock, timeout):
                 items = database.getItemsWithStatus(Status.waiting)
                 for item in items:
                     queue.put(item)
-                    database.updateItemStatus(item['id'], Status.pending)
+                    database.updateItemStatus(item["id"], Status.pending)
 
             # Check the number of items in the queue
             size = queue.qsize()
@@ -100,7 +108,9 @@ def watchdog(queue, threads, lock, timeout):
 
                 # We're going to start a maximum of 2 new threads
                 if len(threads) == 0:
-                    t = threading.Thread(target=worker, name=f"Worker-{0}", args=(queue,))
+                    t = threading.Thread(
+                        target=worker, name=f"Worker-{0}", args=(queue,)
+                    )
                     t.start()
                     threads.append(t)
                 # Release the lock
@@ -113,7 +123,7 @@ def watchdog(queue, threads, lock, timeout):
 
     # Print the thread name and end time
     print(f"{thread.name} ended at {time.ctime()}")
-    print( "Watchdog thread is done" )
+    print("Watchdog thread is done")
 
 
 # Define a function to connect to the database and get the jobs
@@ -125,19 +135,19 @@ def get_jobs_from_database():
     # if file not in DB then delete it
     inprogress = database.getItemsWithStatus(Status.inprogress)
     for item in inprogress:
-        if item['type'] == constants.audio_type or item['type'] == constants.video_type:
-            id = item['id']
-            file_name = item['file_name']
-            if os.path.exists(f"{Paths.data}/{id}/{file_name}" ):
-                print( f"Resetting job {id} back to waiting")
+        if item["type"] == constants.audio_type or item["type"] == constants.video_type:
+            id = item["id"]
+            file_name = item["file_name"]
+            if os.path.exists(f"{Paths.data}/{id}/{file_name}"):
+                print(f"Resetting job {id} back to waiting")
                 database.updateItemStatus(id, Status.waiting)
             else:
-                print( f"Removing job {id} as source file not found")
+                print(f"Removing job {id} as source file not found")
                 database.deleteItem(id)
 
-        elif item['type'] == constants.youtube_type:
+        elif item["type"] == constants.youtube_type:
             # youtube file, reset to pending
-            database.updateItemStatus(item['id'], Status.waiting)
+            database.updateItemStatus(item["id"], Status.waiting)
 
     # # now delete any remaining files in the inprogress folder
     # for filename in os.listdir(f"{Paths.data"):
@@ -147,10 +157,11 @@ def get_jobs_from_database():
     pending = database.getItemsWithStatus(Status.pending)
     waiting = database.getItemsWithStatus(Status.waiting)
 
-    print( "Pending: " + str(len(pending)) )
-    print( "Waiting: " + str(len(waiting)) )
+    print("Pending: " + str(len(pending)))
+    print("Waiting: " + str(len(waiting)))
 
     return pending + waiting
+
 
 # Define a function for the worker thread
 def worker(queue):
