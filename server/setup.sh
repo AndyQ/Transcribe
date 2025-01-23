@@ -77,15 +77,21 @@ else
     cd ..
 fi
 
-# Build whisper
 cd ./whisper.cpp || exit
-if ! make > /dev/null 2>&1 
+if ! cmake -B build  2>&1 
 then
-    printf "Failed to build whisper.cpp\n"
-    printf "Please try again later or build it yourself.\n"
+    printf "Failed to run 'cmake -B build' in whisper.cpp\n"
     exit 1
 fi
-mv main ../3rdparty/whisper
+
+if ! cmake --build build --config Release  2>&1 
+then
+    printf "Failed to run 'cmake --build build --config Release' in whisper.cpp\n"
+    exit 1
+fi
+
+
+mv ./build/bin/whisper-cli ../3rdparty/whisper
 cd ..
 
 # Download the Whisper base model
