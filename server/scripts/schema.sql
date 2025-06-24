@@ -10,7 +10,7 @@ CREATE TABLE item (
     source_url TEXT,
     transcription_file TEXT,
     status TEXT NOT NULL,
-    error_reason TEXT NOT NULL,
+    error_reason TEXT,
     status_updated TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 

@@ -156,6 +156,14 @@
             cursor: pointer;
         }
 
+        .exportItem {
+            cursor: pointer;
+        }
+
+        .deleteItem {
+            cursor: pointer;
+        }
+
         th, td {
             padding: 0 0px 0 15px;
             text-align: left;
@@ -330,7 +338,7 @@
             });
         });
 
-        $('body').on('click', '.exportItem', function() {
+        $('body').on('click', '.exportItem2', function() {
 
             var id = $(this).data('id');
             $.ajax({
@@ -341,7 +349,6 @@
                     console.log(data);
                     
                     if ( data.status == "ok" ) {}
-                        //const toastElement = document.getElementById('liveToast')
                         const toastElement = $('#liveToast');
                         const text = $('#toastBody');
                         text.text("Exported item " + id);
@@ -372,7 +379,7 @@
 
                         var exportButton = ""
                         if ( item.status == "complete" ) {
-                            exportButton = `<i data-id="${item.id}" class="exportItem fa-solid fa-download"></i>`;
+                            exportButton = `<a href="/exportItem/${item.id}"><i data-id="${item.id}" class="exportItem fa-solid fa-download"></i></a>`;
                         }
                         let deleteButton = `<i data-id="${item.id}" class="deleteItem fa-solid fa-trash"></i>`;
                         

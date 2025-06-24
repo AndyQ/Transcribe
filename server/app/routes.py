@@ -1,5 +1,6 @@
 import os
 from flask import Blueprint, redirect, render_template, request, send_file, flash, current_app
+from flask import send_from_directory
 
 from . import routeServices
 from . import database
@@ -123,6 +124,20 @@ def delete(file_id):
     routeServices.deleteItem(file_id)
     return redirect("/")
 
+
+@bp.route("/exportItem/<id>", methods=["GET"])
+def exportItem(id):
+    if id != None:
+        file = f"./data/{id}/transcription.csv"
+        absolute_path = os.path.abspath(file)
+        if os.path.exists(absolute_path):
+
+            # Split file into path and filement
+            return send_file(absolute_path,
+                        download_name='transcription.csv',
+                        as_attachment=True)
+        
+        return '', 204
 
 @bp.route("/exportItem", methods=["POST"])
 def export():
